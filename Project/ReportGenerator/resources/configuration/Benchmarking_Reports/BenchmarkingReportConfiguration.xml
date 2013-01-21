@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<TemplateConfiguration>
+    <Template>
+        <Filename>Template_ATT00013_Report.xlsx</Filename>
+    </Template>
+    <Sheet>
+        <Number>0</Number>
+    </Sheet>
+    <Broker>
+        <Name>
+            <Column>I</Column>
+            <Row>5</Row> 
+        </Name>
+        <Price>
+            <Column>I</Column>
+        </Price>
+        <Supplier>
+            <Column>J</Column>
+        </Supplier>     
+    </Broker>
+    <ConversionRate>
+        <Column>P</Column>
+        <Row>2</Row> 
+    </ConversionRate>
+    <ConsultingDate>
+        <Column>E</Column>
+        <Row>2</Row> 
+    </ConsultingDate>
+    <Hour>
+        <Column>E</Column>
+        <Row>3</Row> 
+    </Hour>
+    <PickUpDate>
+        <Column>E</Column>
+        <Row>4</Row> 
+    </PickUpDate>
+    <NumberOfDays>
+        <Column>D</Column>
+    </NumberOfDays>
+    <Locations>
+        <Location type="Regular" number = "1">
+            <Cell>
+                <Column>B</Column>
+                <Row>7</Row>     
+            </Cell>
+            <Groups>
+                <Group>
+                    <Name>MINI_A</Name>
+                    <Row>7</Row>
+                </Group>
+                <Group>
+                    <Name>C</Name>
+                    <Row>8</Row>
+                </Group>
+                <Group>
+                    <Name>E</Name>
+                    <Row>9</Row>
+                </Group>
+            </Groups>
+        </Location>
+        <Location type="Regular" number= "2">
+            <Cell>
+                <Column>B</Column>
+                <Row>12</Row>
+            </Cell> 
+            
+            <Groups>
+                <Group>
+                    <Name>MINI_A</Name>
+                    <Row>12</Row>
+                </Group>
+                <Group>
+                    <Name>C</Name>
+                    <Row>13</Row>
+                </Group>
+                <Group>
+                    <Name>E</Name>
+                    <Row>14</Row>
+                </Group>
+            </Groups>
+        </Location>
+        <Location type="Regular" number= "3">
+            <Cell>
+                <Column>B</Column>
+                <Row>17</Row>
+            </Cell>
+            
+            <Groups>
+                <Group>
+                    <Name>MINI_A</Name>
+                    <Row>17</Row>
+                </Group>
+                <Group>
+                    <Name>C</Name>
+                    <Row>18</Row>
+                </Group>
+                <Group>
+                    <Name>E</Name>
+                    <Row>19</Row>
+                </Group>
+            </Groups>
+        </Location>
+        <Location type="Regular" number= "4">
+            <Cell>
+                <Column>B</Column>
+                <Row>22</Row> 
+            </Cell>
+            
+            <Groups>
+                <Group>
+                    <Name>MINI_A</Name>
+                    <Row>22</Row>
+                </Group>
+                <Group>
+                    <Name>C</Name>
+                    <Row>23</Row>
+                </Group>
+                <Group>
+                    <Name>E</Name>
+                    <Row>24</Row>
+                </Group>
+            </Groups>
+        </Location>
+        
+        <Location type="Low" number= "1">
+            <Cell>
+                <Column>B</Column>
+                <Row>28</Row> 
+            </Cell>
+            
+            <Groups>
+                <Group>
+                    <Name>MINI_A</Name>
+                    <Row>28</Row>
+                </Group>
+                <Group>
+                    <Name>C</Name>
+                    <Row>29</Row>
+                </Group>
+                <Group>
+                    <Name>E</Name>
+                    <Row>30</Row>
+                </Group>
+            </Groups>
+        </Location>
+        <Location type="Low" number= "2">
+            <Cell>
+                <Column>B</Column>
+                <Row>33</Row>
+            </Cell> 
+            
+            <Groups>
+                <Group>
+                    <Name>MINI_A</Name>
+                    <Row>33</Row>
+                </Group>
+                <Group>
+                    <Name>C</Name>
+                    <Row>34</Row>
+                </Group>
+                <Group>
+                    <Name>E</Name>
+                    <Row>35</Row>
+                </Group>
+            </Groups>
+        </Location>
+        <Location type="Low" number= "3">
+            <Cell>
+                <Column>B</Column>
+                <Row>38</Row> 
+            </Cell>
+            
+            <Groups>
+                <Group>
+                    <Name>MINI_A</Name>
+                    <Row>38</Row>
+                </Group>
+                <Group>
+                    <Name>C</Name>
+                    <Row>39</Row>
+                </Group>
+                <Group>
+                    <Name>E</Name>
+                    <Row>40</Row>
+                </Group>
+            </Groups>
+        </Location>    
+    </Locations>
+    
+</TemplateConfiguration>
