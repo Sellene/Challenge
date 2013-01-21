@@ -64,6 +64,14 @@ public abstract class ConfigurationReader{
 		
 	}
 
+	/**
+	 * Gets a ByteArrayInputStream with the transform XML file
+	 * 
+	 * @param doc
+	 * @param transformationFilename
+	 * @return ByteArrayInputStream
+	 * @throws TransformerException
+	 */
 	private ByteArrayInputStream transformFile(Document doc, String transformationFilename) throws TransformerException {
 		TransformerFactory tFactory = TransformerFactory.newInstance();
 		Transformer transformer = tFactory.newTransformer(new StreamSource(ConfigurationReader.class.getClassLoader().getResourceAsStream(PATH + transformationFilename)));
@@ -77,6 +85,13 @@ public abstract class ConfigurationReader{
 		return new ByteArrayInputStream(data.toByteArray()); 
 	}
 
+	/**
+	 * Verify the XML file against the XSD Schema.
+	 * @param doc
+	 * @param schemaFilename
+	 * @throws SAXException
+	 * @throws IOException
+	 */
 	private void validateFile(Document doc, String schemaFilename) throws SAXException, IOException {
 		SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		Source schemaFile = new StreamSource(ConfigurationReader.class.getClassLoader().getResourceAsStream(PATH + schemaFilename));
@@ -87,6 +102,12 @@ public abstract class ConfigurationReader{
 		
 	}
 
+	/**
+	 * Retrieves the information from the XML file
+	 * 
+	 * @param doc
+	 * @return A Configuration instance
+	 */
 	protected abstract Configuration getConfiguration(Document doc);
 
 	/**

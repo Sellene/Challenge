@@ -1,9 +1,10 @@
-package challenge_it.racbit.model.configurations;
+package challenge_it.racbit.model.reports.configurations;
+
 
 /**
  * Represents a row and a column of a cell
  * 
- *  @author C√°tia Moreira e Jo√£o Taborda
+ *  @author C·tia Moreira e Jo„o Taborda
  *
  */
 public class CrossReference {

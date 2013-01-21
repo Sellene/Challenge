@@ -1,4 +1,4 @@
-package challenge_it.racbit.model.configurations;
+package challenge_it.racbit.model.reports.configurations;
 
 /**
  * Represents a pair containing the excel value and the value that would be used
