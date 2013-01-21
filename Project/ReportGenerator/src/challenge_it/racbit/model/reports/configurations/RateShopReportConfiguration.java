@@ -1,4 +1,4 @@
-package challenge_it.racbit.model.configurations;
+package challenge_it.racbit.model.reports.configurations;
 
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.Map;
  * 
  * Represents the content of the XML file, with the configuration to generate a Rate Shop Report file.
  * 
- *  @author C√°tia Moreira e Jo√£o Taborda
+ *  @author C·tia Moreira e Jo„o Taborda
  *
  */
 public class RateShopReportConfiguration extends Configuration{
