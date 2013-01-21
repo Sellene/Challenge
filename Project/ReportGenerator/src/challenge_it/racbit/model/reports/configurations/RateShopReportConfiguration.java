@@ -29,30 +29,10 @@ public class RateShopReportConfiguration extends Configuration{
 	private CrossReference _dayCell;
 	
 	/**
-	 * Defines the beggining of suppliers header 
+	 * Defines the beginning of groups 
 	 */
-	private CrossReference _suppliersBeginning;
-	
-	/**
-	 * Defines the beggining of groups 
-	 */
-	private CrossReference _groupsBeginning;
-	
-	/**
-	 * Defines is the supplier has a table with minimum value
-	 */
-	private boolean _hasMinimum;
-	
-	/**
-	 * Defines the name of the minimum column
-	 */
-	private String _minimumName;
-	
-	/**
-	 * Contains all of the suppliers and their column index
-	 */
-	private Map<String, Integer> _suppliersMap;
-	
+	private CrossReference _groupsBeginningCell;
+		
 	/**
 	 * Contains all of the groups and their row index
 	 */
@@ -60,13 +40,12 @@ public class RateShopReportConfiguration extends Configuration{
 
 	private List<Broker> _brokers;
 
-	private CrossReference _begin;
+	private CrossReference _gridValuesFirstCell;
 	
 	/**
 	 * Creates an instance of Configuration
 	 */
 	public RateShopReportConfiguration(){
-		_suppliersMap = new HashMap<String, Integer>();
 		_groupsMap = new HashMap<String, CrossReference>();
 	}
 	
@@ -123,16 +102,6 @@ public class RateShopReportConfiguration extends Configuration{
 	public void setDayCell(CrossReference c){
 		_dayCell = c;
 	}
-	
-	/**
-	 * Gets the row and column for the suppliers beginning
-	 * 
-	 *  @return The row and column
-	 */
-	public CrossReference getSuppliersBeginning(){
-		return _suppliersBeginning;
-	}
-	
 
 	public void setBrokers(List<Broker> brokers){
 		_brokers = brokers;
@@ -141,36 +110,6 @@ public class RateShopReportConfiguration extends Configuration{
 	public List<Broker> getBrokers(){
 		return _brokers;
 	}
-	
-	
-	/**
-	 * Sets the row and column for the suppliers beginning
-	 * 
-	 * @param c CrossReference with the row and column
-	 */
-	public void setSuppliersBeginning(CrossReference c){
-		_suppliersBeginning = c;
-	}
-	
-	
-//	/**
-//	 * Gets the list of suppliers and their column index
-//	 * 
-//	 * @return A map of suppliers
-//	 */
-//	public Map<String, Integer> getSuppliersMap(){
-//		return _suppliersMap;
-//	}
-//	
-//	/**
-//	 * Adds a supplier to the map
-//	 * 
-//	 * @param supplier The name of the supplier
-//	 * @param column The column index of the supplier
-//	 */
-//	public void addSupplier(String supplier, int column){
-//		_suppliersMap.put(supplier, column);
-//	}
 	
 	/**
 	 * Gets the list of groups and their row index
@@ -191,47 +130,19 @@ public class RateShopReportConfiguration extends Configuration{
 		_groupsMap.put(group, crossReference);
 	}
 
-	/**
-	 * Gets the row and column for the groups beginning
-	 * 
-	 *  @return The row and column
-	 */
-	public CrossReference getGroupsBeginning(){
-		return _groupsBeginning;
-	}
-	
-	/**
-	 * Sets the row and column for the groups beginning
-	 * 
-	 * @param c CrossReference with the row and column
-	 */
-	public void setGroupsBeginning(CrossReference c){
-		_groupsBeginning = c;
-	}
-	
-	/**
-	 * Gets the name of the column minimum
-	 * 
-	 *  @return he name for the column
-	 */
-	public String getMinimumColumnName(){
-		return _minimumName;
-	}
-	
-	/**
-	 * Sets the name of the column minimum
-	 * 
-	 * @param name The name for the column
-	 */
-	public void setMinimumColumnName(String name){
-		_minimumName = name;
+	public CrossReference getGroupsBeginningCell() {
+		return _groupsBeginningCell;
 	}
 
-	public CrossReference getBegin() {
-		return _begin;
+	public void setGroupsBeginningCell(CrossReference _groupsBeginningCell) {
+		this._groupsBeginningCell = _groupsBeginningCell;
 	}
-	
-	public void setBegin(CrossReference c) {
-		_begin = c;
+
+	public CrossReference getGridValuesFirstCell() {
+		return _gridValuesFirstCell;
+	}
+
+	public void setGridValuesFirstCell(CrossReference _gridValuesFirstCell) {
+		this._gridValuesFirstCell = _gridValuesFirstCell;
 	}
 }

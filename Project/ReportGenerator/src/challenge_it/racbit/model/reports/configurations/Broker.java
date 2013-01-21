@@ -1,16 +1,37 @@
-package challenge_it.racbit.model.configurations;
+package challenge_it.racbit.model.reports.configurations;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents the information contained in the Broker
+ * 
+ *  @author Cátia Moreira e João Taborda
+ *
+ */
 public class Broker {
 
+	
+	/**
+	 * Defines the name of the broker
+	 */
 	private String _name;
+	
+	/**
+	 * States that the broker was a minimum
+	 */
 	private boolean _hasMinimum;
+	
+	/**
+	 * Defines the name of the minimum column
+	 */
 	private String _minColumnName;
 	
+	/**
+	 * List to fill the suppliers header
+	 */
 	private List<String> _suppliersHeader;
 	
 	/**
@@ -18,6 +39,13 @@ public class Broker {
 	 */
 	private Map<String, CrossReference> _suppliersMap;
 	
+	/**
+	 * Creates a Broker instance
+	 * 
+	 * @param name The broker name
+	 * @param mininum If has a minimum column
+	 * @param columnName The name of the minimum column
+	 */
 	public Broker(String name, boolean mininum, String columnName){
 		_name = name;
 		_hasMinimum = mininum;
@@ -46,18 +74,34 @@ public class Broker {
 		_suppliersMap.put(supplier, ref);
 	}
 	
+	/**
+	 * Get the Broker name
+	 * 
+	 * @return The broker name
+	 */
 	public String getName(){
 		return _name;
 	}
 
+	/**
+	 * Gets the supplier List
+	 * 
+	 * @return The suppliers list
+	 */
 	public List<String> getSuppliersHeaders() {
 		return _suppliersHeader;
 	}
 
+	/**
+	 * @return 
+	 */
 	public boolean hasMinimum() {
 		return _hasMinimum;
 	}
 
+	/**
+	 * @return
+	 */
 	public String getMinimumColumnName() {
 		return _minColumnName;
 	}

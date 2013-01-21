@@ -1,4 +1,4 @@
-package challenge_it.racbit.model.configurations;
+package challenge_it.racbit.model.reports.configurations;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,35 +12,29 @@ public class RateShopReportConfigurationReader extends ConfigurationReader{
 
 	@Override
 	protected Configuration getConfiguration(Document doc) {
-		Node templateFilename = doc.getElementsByTagName("Template").item(0);
-		Node sheetNum = doc.getElementsByTagName("Sheet").item(0);
-		Node destination = doc.getElementsByTagName("Destination").item(0);
-		Node month = doc.getElementsByTagName("Month").item(0);
-		Node days = doc.getElementsByTagName("Days").item(0);		
-		Node rate = doc.getElementsByTagName("ConversionRate").item(0);
-		Node generate = doc.getElementsByTagName("Generate").item(0);
-		CrossReference begin = getCell(generate.getFirstChild());
-		
-		NodeList brokers = doc.getElementsByTagName("Broker");
-		NodeList suppliers;
-		NodeList groups = doc.getElementsByTagName("Group");
-		
 		RateShopReportConfiguration configuration = new RateShopReportConfiguration();
+		
+		configuration.setTemplateFilename(doc.getElementsByTagName("Template").item(0).getFirstChild().getTextContent());
+		
+		configuration.setSheetNumber(Integer.parseInt( doc.getElementsByTagName("Sheet").item(0).getFirstChild().getTextContent()));
 
-		configuration.setTemplateFilename(templateFilename.getFirstChild().getTextContent());
-		configuration.setSheetNumber(Integer.parseInt(sheetNum.getFirstChild().getTextContent()));
-		configuration.setDestinationCell(getCell(destination));
-		configuration.setMonthCell(getCell(month));
-		configuration.setDayCell(getCell(days));
-		configuration.setRateCell(getCell(rate));
-		configuration.setBegin(begin);
-
-		Node node;
+		configuration.setDestinationCell(getCell(doc.getElementsByTagName("Destination").item(0)));
+		
+		configuration.setMonthCell(getCell(doc.getElementsByTagName("Month").item(0)));
+		
+		configuration.setDayCell(getCell(doc.getElementsByTagName("Days").item(0)));
+		
+		configuration.setRateCell(getCell(doc.getElementsByTagName("ConversionRate").item(0)));
+		
+		CrossReference gridBeginCell = getCell(doc.getElementsByTagName("Generate").item(0).getFirstChild());
+		configuration.setGridValuesFirstCell(gridBeginCell);
+		
 		List <Broker> brokerList = new LinkedList<Broker>();
+		NodeList brokers = doc.getElementsByTagName("Broker");
 		
 		for(int i=0; i<brokers.getLength(); i++){
-			node = brokers.item(i);
-			NamedNodeMap attr = node.getAttributes();
+			Node brokerNode = brokers.item(i);
+			NamedNodeMap attr = brokerNode.getAttributes();
 			boolean hasMinimum = Boolean.parseBoolean(attr.getNamedItem("hasMinimum").getTextContent());
 			String name = attr.getNamedItem("name").getTextContent();
 			String columnName = null;
@@ -48,21 +42,23 @@ public class RateShopReportConfigurationReader extends ConfigurationReader{
 			if(hasMinimum)
 				columnName =attr.getNamedItem("minimumName").getTextContent();
 				
-			Broker b = new Broker(name, hasMinimum, columnName);
+			Broker broker = new Broker(name, hasMinimum, columnName);
 			
-			suppliers = node.getFirstChild().getChildNodes();
+			NodeList suppliers = brokerNode.getFirstChild().getChildNodes();
 			
 			for(int j=0; j<suppliers.getLength(); j++){
-				node = suppliers.item(j); 
-				b.addSupplier(node.getFirstChild().getTextContent(), new CrossReference(new ExcelPair<Integer, Integer>(null, begin.getRow()-1), new ExcelPair<String, Integer>(null, begin.getColumn()+j)));
+				Node supplierNode = suppliers.item(j); 
+				broker.addSupplier(supplierNode.getFirstChild().getTextContent(), new CrossReference(new ExcelPair<Integer, Integer>(null, gridBeginCell.getRow()-1), new ExcelPair<String, Integer>(null, gridBeginCell.getColumn()+j)));
 			}
 			
-			brokerList.add(b);
+			brokerList.add(broker);
 		}
 
+		NodeList groups = doc.getElementsByTagName("Group");
+		
 		for(int j=0; j<groups.getLength(); j++){
-			node = groups.item(j); 
-			configuration.addGroup(node.getFirstChild().getTextContent(), new CrossReference(new ExcelPair<Integer, Integer>(null, begin.getRow()+j), new ExcelPair<String, Integer>(null, begin.getColumn()-1)));
+			Node groupNode = groups.item(j); 
+			configuration.addGroup(groupNode.getFirstChild().getTextContent(), new CrossReference(new ExcelPair<Integer, Integer>(null, gridBeginCell.getRow()+j), new ExcelPair<String, Integer>(null, gridBeginCell.getColumn()-1)));
 		}
 		
 		configuration.setBrokers(brokerList);
