@@ -4,10 +4,11 @@ import challenge_it.racbit.model.core.exceptions.CurrencyConversionException;
 
 /**
  * Class that represents the information received in JSON from the ExchangeRateService
+ * Because the JSON string must be converted to an object in Java, the instance fields should have the same name as the ones in the JSON string 
  * 
  * (http://www.google.com/ig/calculator?hl=en&q=1EUR=?GBP -> {lhs: "1 Euro",rhs: "0.801398951 British pounds",error: "",icc: true})
  * 
- *  @author C√°tia Moreira e Jo√£o Taborda
+ *  @author C·tia Moreira e Jo„o Taborda
  *
  */
 public class Conversion {
@@ -38,7 +39,7 @@ public class Conversion {
 	/**
 	 * @param d - The value to round
 	 * @param c - The number of decimals
-	 * @return
+	 * @return the value conversion
 	 */
 	private static double roundToDecimals(double d, int c) {
 		int temp=(int)((d*Math.pow(10,c)));

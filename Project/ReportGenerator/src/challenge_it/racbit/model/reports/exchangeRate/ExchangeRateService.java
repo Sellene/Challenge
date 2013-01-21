@@ -1,11 +1,9 @@
 package challenge_it.racbit.model.reports.exchangeRate;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import challenge_it.racbit.model.core.exceptions.CurrencyConversionException;
@@ -17,7 +15,7 @@ import com.google.gson.Gson;
  * 
  * (http://www.google.com/ig/calculator?hl=en&q=1EUR=?GBP -> {lhs: "1 Euro",rhs: "0.801398951 British pounds",error: "",icc: true})
  * 
- *  @author C√°tia Moreira e Jo√£o Taborda
+ *  @author C·tia Moreira e Jo„o Taborda
  *
  */
 public class ExchangeRateService {
@@ -29,13 +27,11 @@ public class ExchangeRateService {
 	 * @param to The currency wanted ( e.g.: EUR, USD, GBP, ...)
 	 * @param numOfDecimals The number of decimals
 	 * @return The current currency
-	 * @throws IOException When there is no connection
 	 * @throws CurrencyConversionException When occurs an error on convert result
 	 */
-	public static double getExchangeRate(String from, String to, int numOfDecimals) throws IOException, CurrencyConversionException {
-		URL url;
+	public static double getExchangeRate(String from, String to, int numOfDecimals) throws CurrencyConversionException {
 		try {
-			url = new URL(String.format("http://www.google.com/ig/calculator?q=1%s=?%s", from, to));
+			URL url = new URL(String.format("http://www.google.com/ig/calculator?q=1%s=?%s", from, to));
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			
 			InputStreamReader in = new InputStreamReader((InputStream) connection.getContent());
@@ -44,16 +40,8 @@ public class ExchangeRateService {
 			Conversion c = new Gson().fromJson(buff.readLine(), Conversion.class);
 			return c.exchangeRate(numOfDecimals);
 			
-		} catch (MalformedURLException e) {
-			//Em principio n√£o ocorre, porque o url lida com isso
-		} catch (IOException e) {
-			System.out.println("There's no connection.");
-			throw e;
-		} catch (CurrencyConversionException e) {
-			System.out.println("Error in the conversion result");
-			throw e;
+		} catch (Exception e) {
+			throw new CurrencyConversionException(e);
 		}
-		
-		return 0;
 	}
 }
