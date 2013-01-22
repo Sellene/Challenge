@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import challenge_it.racbit.model.core.Product;
+
 /**
  * Represents the information contained in the Broker
  * 
@@ -34,6 +36,8 @@ public class Broker {
 	 */
 	private List<String> _suppliersHeader;
 	
+	private List<Product> _brokerProducts;
+	
 	/**
 	 * Contains all of the suppliers and their column index
 	 */
@@ -50,7 +54,8 @@ public class Broker {
 		_name = name;
 		_hasMinimum = mininum;
 		_minColumnName = columnName;
-		_suppliersHeader = new LinkedList<>();
+		_suppliersHeader = new LinkedList<String>();
+		_brokerProducts = new LinkedList<Product>();
 		_suppliersMap = new HashMap<String, CrossReference>();
 	}
 	
@@ -88,7 +93,7 @@ public class Broker {
 	 * 
 	 * @return The suppliers list
 	 */
-	public List<String> getSuppliersHeaders() {
+	public List<String> getSuppliersList() {
 		return _suppliersHeader;
 	}
 
@@ -104,5 +109,13 @@ public class Broker {
 	 */
 	public String getMinimumColumnName() {
 		return _minColumnName;
+	}
+
+	public List<Product> getProducts() {
+		return _brokerProducts;
+	}
+
+	public void addProduct(Product product) {
+		_brokerProducts.add(product);
 	}
 }

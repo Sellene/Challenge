@@ -12,21 +12,23 @@ public class RateShopReportConfigurationReader extends ConfigurationReader{
 
 	@Override
 	protected Configuration getConfiguration(Document doc) {
+		final int FIRST_IDX = 0;
+		
 		RateShopReportConfiguration configuration = new RateShopReportConfiguration();
 		
-		configuration.setTemplateFilename(doc.getElementsByTagName("Template").item(0).getFirstChild().getTextContent());
+		configuration.setTemplateFilename(doc.getElementsByTagName("Template").item(FIRST_IDX).getFirstChild().getTextContent());
 		
-		configuration.setSheetNumber(Integer.parseInt( doc.getElementsByTagName("Sheet").item(0).getFirstChild().getTextContent()));
+		configuration.setSheetNumber(Integer.parseInt( doc.getElementsByTagName("Sheet").item(FIRST_IDX).getFirstChild().getTextContent()));
 
-		configuration.setDestinationCell(getCell(doc.getElementsByTagName("Destination").item(0)));
+		configuration.setDestinationCell(getCell(doc.getElementsByTagName("Destination").item(FIRST_IDX)));
 		
-		configuration.setMonthCell(getCell(doc.getElementsByTagName("Month").item(0)));
+		configuration.setMonthCell(getCell(doc.getElementsByTagName("Month").item(FIRST_IDX)));
 		
-		configuration.setDayCell(getCell(doc.getElementsByTagName("Days").item(0)));
+		configuration.setDayCell(getCell(doc.getElementsByTagName("Days").item(FIRST_IDX)));
 		
-		configuration.setRateCell(getCell(doc.getElementsByTagName("ConversionRate").item(0)));
+		configuration.setRateCell(getCell(doc.getElementsByTagName("ConversionRate").item(FIRST_IDX)));
 		
-		CrossReference gridBeginCell = getCell(doc.getElementsByTagName("Generate").item(0).getFirstChild());
+		CrossReference gridBeginCell = getCell(doc.getElementsByTagName("Generate").item(FIRST_IDX).getFirstChild());
 		configuration.setGridValuesFirstCell(gridBeginCell);
 		
 		List <Broker> brokerList = new LinkedList<Broker>();
@@ -51,7 +53,7 @@ public class RateShopReportConfigurationReader extends ConfigurationReader{
 				broker.addSupplier(supplierNode.getFirstChild().getTextContent(), new CrossReference(new ExcelPair<Integer, Integer>(null, gridBeginCell.getRow()-1), new ExcelPair<String, Integer>(null, gridBeginCell.getColumn()+j)));
 			}
 			
-			brokerList.add(broker);
+			configuration.addBroker(name, broker);
 		}
 
 		NodeList groups = doc.getElementsByTagName("Group");
@@ -61,7 +63,7 @@ public class RateShopReportConfigurationReader extends ConfigurationReader{
 			configuration.addGroup(groupNode.getFirstChild().getTextContent(), new CrossReference(new ExcelPair<Integer, Integer>(null, gridBeginCell.getRow()+j), new ExcelPair<String, Integer>(null, gridBeginCell.getColumn()-1)));
 		}
 		
-		configuration.setBrokers(brokerList);
+
 		return configuration;
 	}
 

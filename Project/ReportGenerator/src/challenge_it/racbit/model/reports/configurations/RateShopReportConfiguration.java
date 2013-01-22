@@ -1,6 +1,7 @@
 package challenge_it.racbit.model.reports.configurations;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,8 +38,10 @@ public class RateShopReportConfiguration extends Configuration{
 	 * Contains all of the groups and their row index
 	 */
 	private Map<String, CrossReference> _groupsMap;
+	
+	private List<String> _groupsList;
 
-	private List<Broker> _brokers;
+	private Map<String, Broker> _brokers;
 
 	private CrossReference _gridValuesFirstCell;
 	
@@ -46,8 +49,11 @@ public class RateShopReportConfiguration extends Configuration{
 	 * Creates an instance of Configuration
 	 */
 	public RateShopReportConfiguration(){
+		_groupsList = new LinkedList<String>();
 		_groupsMap = new HashMap<String, CrossReference>();
+		_brokers = new HashMap<String, Broker>();
 	}
+
 	
 	/**
 	 * Gets the row and column for the destination
@@ -103,11 +109,11 @@ public class RateShopReportConfiguration extends Configuration{
 		_dayCell = c;
 	}
 
-	public void setBrokers(List<Broker> brokers){
-		_brokers = brokers;
+	public void addBroker(String name, Broker b){
+		_brokers.put(name, b);
 	}
 	
-	public List<Broker> getBrokers(){
+	public Map<String, Broker> getBrokers(){
 		return _brokers;
 	}
 	
@@ -127,7 +133,12 @@ public class RateShopReportConfiguration extends Configuration{
 	 * @param crossReference The row index of the group
 	 */
 	public void addGroup(String group, CrossReference crossReference){
+		_groupsList.add(group);
 		_groupsMap.put(group, crossReference);
+	}
+	
+	public List<String> getGroupsList(){
+		return _groupsList;
 	}
 
 	public CrossReference getGroupsBeginningCell() {
