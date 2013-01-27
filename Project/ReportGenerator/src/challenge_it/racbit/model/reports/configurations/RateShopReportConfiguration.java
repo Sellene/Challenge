@@ -42,6 +42,8 @@ public class RateShopReportConfiguration extends Configuration{
 	private List<String> _groupsList;
 
 	private Map<String, Broker> _brokers;
+	
+	private List<String> _brokersList;
 
 	private CrossReference _gridValuesFirstCell;
 	
@@ -52,6 +54,7 @@ public class RateShopReportConfiguration extends Configuration{
 		_groupsList = new LinkedList<String>();
 		_groupsMap = new HashMap<String, CrossReference>();
 		_brokers = new HashMap<String, Broker>();
+		_brokersList = new LinkedList<String>();
 	}
 
 	
@@ -110,6 +113,7 @@ public class RateShopReportConfiguration extends Configuration{
 	}
 
 	public void addBroker(String name, Broker b){
+		_brokersList.add(name);
 		_brokers.put(name, b);
 	}
 	
@@ -137,10 +141,14 @@ public class RateShopReportConfiguration extends Configuration{
 		_groupsMap.put(group, crossReference);
 	}
 	
+	public List<String> getBrokersList(){
+		return _brokersList;
+	}
+	
 	public List<String> getGroupsList(){
 		return _groupsList;
 	}
-
+	
 	public CrossReference getGroupsBeginningCell() {
 		return _groupsBeginningCell;
 	}

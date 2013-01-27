@@ -33,8 +33,6 @@ import challenge_it.racbit.model.core.exceptions.ReportGenerationException;
  */
 public abstract class ConfigurationReader{
 
-	private static final String PATH = "configuration/";
-	
 	/**
 	 * Gets a Configuration instance with the XML information
 	 * 
@@ -52,7 +50,7 @@ public abstract class ConfigurationReader{
 			dbFactory.setIgnoringElementContentWhitespace(true);
 			
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(ConfigurationReader.class.getClassLoader().getResourceAsStream(PATH + configurationFilename));
+			Document doc = dBuilder.parse(ConfigurationReader.class.getClassLoader().getResourceAsStream(configurationFilename));
 			
 			validateFile(doc, schemaFilename);
 
@@ -74,7 +72,7 @@ public abstract class ConfigurationReader{
 	 */
 	private ByteArrayInputStream transformFile(Document doc, String transformationFilename) throws TransformerException {
 		TransformerFactory tFactory = TransformerFactory.newInstance();
-		Transformer transformer = tFactory.newTransformer(new StreamSource(ConfigurationReader.class.getClassLoader().getResourceAsStream(PATH + transformationFilename)));
+		Transformer transformer = tFactory.newTransformer(new StreamSource(ConfigurationReader.class.getClassLoader().getResourceAsStream(transformationFilename)));
 
 		DOMSource source = new DOMSource(doc);
 		ByteArrayOutputStream data = new ByteArrayOutputStream();
@@ -94,7 +92,7 @@ public abstract class ConfigurationReader{
 	 */
 	private void validateFile(Document doc, String schemaFilename) throws SAXException, IOException {
 		SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-		Source schemaFile = new StreamSource(ConfigurationReader.class.getClassLoader().getResourceAsStream(PATH + schemaFilename));
+		Source schemaFile = new StreamSource(ConfigurationReader.class.getClassLoader().getResourceAsStream(schemaFilename));
 	    		
 		Schema schema = factory.newSchema(schemaFile);
 		Validator validator = schema.newValidator();
@@ -120,8 +118,8 @@ public abstract class ConfigurationReader{
 		String column = node.getFirstChild().getTextContent();
 		int row = Integer.parseInt(node.getLastChild().getTextContent());
 		
-		return new CrossReference(new ExcelPair<Integer,Integer>(row, row-1), new ExcelPair<String, Integer>(column, getColumn(column)));
-	}
+		return new CrossReference(row-1, getColumn(column));
+	}	
 	
 	/**
 	 * Converts the column index of a XLST file to numbered indexes. (e.g.: A -> 0; AA->26; ...)

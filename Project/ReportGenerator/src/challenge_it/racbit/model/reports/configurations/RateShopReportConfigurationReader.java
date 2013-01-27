@@ -1,8 +1,5 @@
 package challenge_it.racbit.model.reports.configurations;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -31,7 +28,6 @@ public class RateShopReportConfigurationReader extends ConfigurationReader{
 		CrossReference gridBeginCell = getCell(doc.getElementsByTagName("Generate").item(FIRST_IDX).getFirstChild());
 		configuration.setGridValuesFirstCell(gridBeginCell);
 		
-		List <Broker> brokerList = new LinkedList<Broker>();
 		NodeList brokers = doc.getElementsByTagName("Broker");
 		
 		for(int i=0; i<brokers.getLength(); i++){
@@ -50,7 +46,7 @@ public class RateShopReportConfigurationReader extends ConfigurationReader{
 			
 			for(int j=0; j<suppliers.getLength(); j++){
 				Node supplierNode = suppliers.item(j); 
-				broker.addSupplier(supplierNode.getFirstChild().getTextContent(), new CrossReference(new ExcelPair<Integer, Integer>(null, gridBeginCell.getRow()-1), new ExcelPair<String, Integer>(null, gridBeginCell.getColumn()+j)));
+				broker.addSupplier(supplierNode.getFirstChild().getTextContent(), new CrossReference(gridBeginCell.getRow()-1, j));
 			}
 			
 			configuration.addBroker(name, broker);
@@ -60,7 +56,7 @@ public class RateShopReportConfigurationReader extends ConfigurationReader{
 		
 		for(int j=0; j<groups.getLength(); j++){
 			Node groupNode = groups.item(j); 
-			configuration.addGroup(groupNode.getFirstChild().getTextContent(), new CrossReference(new ExcelPair<Integer, Integer>(null, gridBeginCell.getRow()+j), new ExcelPair<String, Integer>(null, gridBeginCell.getColumn()-1)));
+			configuration.addGroup(groupNode.getFirstChild().getTextContent(), new CrossReference(gridBeginCell.getRow()+j, gridBeginCell.getColumn()-1));
 		}
 		
 

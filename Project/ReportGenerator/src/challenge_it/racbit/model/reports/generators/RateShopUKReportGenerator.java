@@ -1,32 +1,26 @@
 package challenge_it.racbit.model.reports.generators;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.poi.hssf.record.CFRuleRecord.ComparisonOperator;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.ComparisonOperator;
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFConditionalFormattingRule;
-import org.apache.poi.xssf.usermodel.XSSFFontFormatting;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -37,9 +31,7 @@ import challenge_it.racbit.model.core.Product.InsurancePackage;
 import challenge_it.racbit.model.core.exceptions.CurrencyConversionException;
 import challenge_it.racbit.model.core.exceptions.ReportGenerationException;
 import challenge_it.racbit.model.reports.configurations.Broker;
-import challenge_it.racbit.model.reports.configurations.ConfigurationReader;
 import challenge_it.racbit.model.reports.configurations.CrossReference;
-import challenge_it.racbit.model.reports.configurations.ExcelPair;
 import challenge_it.racbit.model.reports.configurations.RateShopReportConfiguration;
 import challenge_it.racbit.model.reports.configurations.RateShopReportConfigurationReader;
 import challenge_it.racbit.model.reports.exchangeRate.ExchangeRateService;
@@ -77,9 +69,9 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	}
 	
 	
-	private static final String XML_CONFIGURATION = "RateShop_Reports/UK_Reports/RateShopUKReportConfiguration.xml";
-	private static final String XML_SCHEMA = "RateShop_Reports/RateShopReportSchema.xsd";
-	private static final String XML_TRANSFORMATION = "ReportTransformation.xsl";
+	private static final String XML_CONFIGURATION = "configuration/RateShop_Reports/UK_Reports/RateShopUKReportConfiguration.xml";
+	private static final String XML_SCHEMA = "configuration/RateShop_Reports/RateShopReportSchema.xsd";
+	private static final String XML_TRANSFORMATION = "configuration/ReportTransformation.xsl";
 	
 	private static final String PATH = "templates/";
 	
@@ -99,10 +91,12 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 			
 			setFixedValues(sheet, config, reportInfo);
 						
-			int brokerFirstSupplierIndex = 0;
+			int brokerFirstSupplierIndex = config.getGridValuesFirstCell().getColumn();
 				
-			for(Broker broker : config.getBrokers().values())
+			for(String brokerName : config.getBrokersList())
 			{
+				Broker broker = config.getBrokers().get(brokerName);
+				
 				for (Product product : broker.getProducts()) {
 					
 					CrossReference supplierCell = broker.getSuppliersMap().get(product.getSupplier());
@@ -127,16 +121,20 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 					}
 				}
 				
-				setMinimumColumn(workbook, sheet, config, broker, brokerFirstSupplierIndex);
-				setTableCells(workbook,sheet, config, broker, brokerFirstSupplierIndex);
-				/// TODO ???????setMinimumColor(workbook,sheet, config, broker, brokerFirstSupplierIndex);
+				if(broker.hasMinimum()){
+					setMinimumColumn(workbook, sheet, config, broker, brokerFirstSupplierIndex);
+					setMinimumColor(workbook, sheet, config, brokerFirstSupplierIndex, broker);
+				}
+				
+				setTableCells(workbook, sheet, config, broker, brokerFirstSupplierIndex);
+
 				fillSuppliersHeader(workbook, sheet, config.getGridValuesFirstCell(), brokerFirstSupplierIndex, broker);
 				
-				brokerFirstSupplierIndex += broker.getSuppliersList().size() + 1;
+				brokerFirstSupplierIndex += broker.getSuppliersList().size() + (broker.hasMinimum()?1:0);
 			}
 			
 			fillGroups(workbook, sheet, config);
-			saveFile(workbook, reportInfo);
+			saveFile(workbook, reportInfo, reportDate, country);
 		}
 		catch (CurrencyConversionException e){
 			throw e;
@@ -163,18 +161,48 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	private void fillSuppliersHeader(Workbook workbook, Sheet sheet, CrossReference firstCellOfTheGrid, int brokerIndex, Broker broker) {
 
 		int row = firstCellOfTheGrid.getRow()-1;
-		int firstColumn = firstCellOfTheGrid.getColumn() + brokerIndex;
 		
+		Cell supplierCell = null;
+
 		for (String  supplier : broker.getSuppliersList()) {
-			Cell supplierCell = sheet.getRow(row).createCell(firstColumn + broker.getSuppliersMap().get(supplier).getColumn());
 			CellStyle supplierCellStyle = getDefaultCellStyle(workbook);
 			supplierCellStyle.setBorderBottom(CellStyle.BORDER_MEDIUM);
+			
+			supplierCell = sheet.getRow(row).createCell(brokerIndex + broker.getSuppliersMap().get(supplier).getColumn());
 			supplierCell.setCellStyle(supplierCellStyle);
 			supplierCell.setCellValue(supplier);
 			supplierCell.setCellType(Cell.CELL_TYPE_STRING);
 		}
 		
-		//TODO: Unir as celulas po nome do broker
+		if(!broker.hasMinimum()){
+			CellStyle supplierCellStyle = getDefaultCellStyle(workbook);
+			supplierCellStyle.setBorderBottom(CellStyle.BORDER_MEDIUM);
+			supplierCellStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
+			supplierCell.setCellStyle(supplierCellStyle);
+		}
+
+		CellStyle brokerCellStyle = getDefaultCellStyle(workbook);
+		brokerCellStyle.setBorderBottom(CellStyle.BORDER_MEDIUM);
+		brokerCellStyle.setBorderTop(CellStyle.BORDER_MEDIUM);
+		brokerCellStyle.setBorderLeft(CellStyle.BORDER_MEDIUM);
+		brokerCellStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
+		
+		Cell brokerName = sheet.getRow(row-1).createCell(brokerIndex);
+		brokerName.setCellValue(broker.getName());
+		brokerName.setCellStyle(brokerCellStyle);
+		
+		int lastColumn = brokerIndex + broker.getSuppliersList().size() + (broker.hasMinimum()?0:-1);
+		
+		for(int i = brokerIndex+1; i <= lastColumn;i++){
+			sheet.getRow(row-1).createCell(i).setCellStyle(brokerCellStyle);
+		}
+		
+		sheet.addMergedRegion(new CellRangeAddress(
+	            row-1, //first row (0-based)
+	            row-1, //last row  (0-based)
+	            brokerIndex, //first column (0-based)
+	            lastColumn  //last column  (0-based)
+	    ));
 	}
 
 	private RateShopUKReportInfo completeBrokerInformation(RateShopReportConfiguration config, Iterable<Product> results) {
@@ -200,7 +228,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 			if(b != null){
 				
 				if(!b.getSuppliersList().contains(product.getSupplier())){
-					b.addSupplier(product.getSupplier(), new CrossReference(new ExcelPair<Integer, Integer>(null, config.getGridValuesFirstCell().getRow()-1), new ExcelPair<String, Integer>(null, config.getGridValuesFirstCell().getColumn() + b.getSuppliersList().size())));
+					b.addSupplier(product.getSupplier(), new CrossReference(config.getGridValuesFirstCell().getRow()-1, b.getSuppliersList().size()));
 				}
 				b.addProduct(product);
 			}
@@ -210,119 +238,67 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		return reportInfo;
 	}
 
-//	private void setTableStyleBoundariesAndStyles(RateShopReportConfiguration config, Sheet sheet, Workbook workbook, int lastColumnOfLastBroker) {
-//		int firstRow = config.getGridValuesFirstCell().getRow(); 
-//		int lastRow = firstRow + config.getGroupsList().size();
-//		int firstColumn = config.getGridValuesFirstCell().getColumn();
-//		int lastColumn = firstColumn + lastColumnOfLastBroker;  
-//		
-//		
-//		
-//		//É necessário? cada celula que se cria já gera o seu proprio border
-//		
-//		
-//		Cell cell;
-//
-//		//Sets left border
-//		for(int i = firstRow; i<lastRow; i++){
-//			cell = sheet.getRow(i).getCell(firstColumn);
-//			CellStyle styleLeft = workbook.createCellStyle();
-//			styleLeft.cloneStyleFrom(cell.getCellStyle());
-//			styleLeft.setBorderLeft(CellStyle.BORDER_MEDIUM);
-//			cell.setCellStyle(styleLeft);
-//		}
-//		
-//		//Sets top border
-//		for(int i = firstColumn; i<lastColumn; i++){
-//			cell = sheet.getRow(firstRow).getCell(i);
-//			CellStyle styleTop = workbook.createCellStyle();
-//			styleTop.cloneStyleFrom(cell.getCellStyle());
-//			styleTop.setBorderTop(CellStyle.BORDER_MEDIUM);
-//			cell.setCellStyle(styleTop);
-//		}
-//		
-//		//Sets bottom border
-//		for(int i = firstColumn-1; i<lastColumn; i++){
-//			cell = sheet.getRow(lastRow-1).getCell(i);
-//			CellStyle styleBottom = workbook.createCellStyle();
-//			styleBottom.cloneStyleFrom(cell.getCellStyle());
-//			styleBottom.setBorderBottom(CellStyle.BORDER_MEDIUM);
-//			cell.setCellStyle(styleBottom);
-//		}
-//		
-//		//Sets right border
-//		for(int i = firstRow; i<lastRow; i++){
-//			cell = sheet.getRow(i).getCell(lastColumn);
-//			CellStyle styleRight = workbook.createCellStyle();
-//			styleRight.cloneStyleFrom(cell.getCellStyle());
-//			styleRight.setBorderRight(CellStyle.BORDER_MEDIUM);
-//			cell.setCellStyle(styleRight);
-//		}
-//		
-//	}
-
-//	private void setMinimumColor(RateShopReportConfiguration config, Sheet sheet, Workbook workbook, int firstRow, int lastRow, int firstColumn, int lastColumn) {
-//		int column = config.getGridValuesFirstCell().getColumn() + broker.getSuppliersHeaders().size();
-//		int row = config.getGridValuesFirstCell().getRow();
-//		
-//		Cell minimumCell; 
-//		
-//		Cell cell;
-//		CellStyle style = workbook.createCellStyle();
-//		style = getDefaultCellStyle(workbook);
-//
-//		for(int i = firstRow; i<lastRow; i++){
-//			
-//			minimumCell = sheet.getRow(i).getCell(lastColumn);
-//			FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-//			
-//			CellValue cellValue = evaluator.evaluate(minimumCell);
-//			
-//			SheetConditionalFormatting cf = sheet.getSheetConditionalFormatting();
-//			XSSFConditionalFormattingRule rule = (XSSFConditionalFormattingRule) cf.createConditionalFormattingRule(
-//			     ComparisonOperator.EQUAL, 
-//			     cellValue.getNumberValue() + "",
-//			     null
-//			);
-//
-//			 // Create pattern with red background
-//			XSSFFontFormatting fontFmt = rule.createFontFormatting();
-//			fontFmt.setFontColorIndex(HSSFColor.RED.index);
-//
-//			 // Define a region containing first column
-//			CellRangeAddress[] cra = {new CellRangeAddress(i, i, 
-//					 firstColumn, lastColumn-1) };
-//
-//			 // Apply Conditional Formatting rule defined above to the regions  
-//			cf.addConditionalFormatting(cra, rule);
-//		}		
-//	}
-
-	private void setTableCells(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker b, int BrokerIndex) {
+	private void setMinimumColor(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, int brokerIndex, Broker broker) {
+		int lastColumn = brokerIndex + broker.getSuppliersList().size();
+		int firstRow = config.getGridValuesFirstCell().getRow();
 		
-		for(int i = config.getGridValuesFirstCell().getRow(); i < config.getGroupsList().size(); i++)
+		for(int i = firstRow; i < firstRow+config.getGroupsList().size(); i++){
+			
+			CellValue cellMinimumValue = workbook.getCreationHelper().createFormulaEvaluator().evaluate(sheet.getRow(i).getCell(lastColumn));
+			
+			SheetConditionalFormatting cf = sheet.getSheetConditionalFormatting();
+			XSSFConditionalFormattingRule rule = (XSSFConditionalFormattingRule) cf.createConditionalFormattingRule(
+			     ComparisonOperator.EQUAL, 
+			     cellMinimumValue.getNumberValue() + "",
+			     null
+			);
+
+			 // Create pattern with red background
+			rule.createFontFormatting().setFontColorIndex(HSSFColor.RED.index);
+
+			 // Define a region containing first column
+			CellRangeAddress[] cra = {new CellRangeAddress(i, i, brokerIndex, lastColumn-1) };
+
+			 // Apply Conditional Formatting rule defined above to the regions  
+			cf.addConditionalFormatting(cra, rule);
+		}		
+	}
+
+	private void setTableCells(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker b, int firstColumn) {
+		
+		int lastColumn = firstColumn + b.getSuppliersList().size();
+			
+		for(int i = config.getGridValuesFirstCell().getRow(); i < config.getGridValuesFirstCell().getRow() + config.getGroupsList().size(); i++)
 		{
-			for(int j= BrokerIndex; j < BrokerIndex + b.getSuppliersList().size(); j++)
+			Cell newCell = null;
+			
+			for(int j = firstColumn; j < lastColumn ; j++)
 			{
 				if(sheet.getRow(i).getCell(j) == null)
 				{
-					Cell newCell = sheet.getRow(i).createCell(j);
-					
+					newCell = sheet.getRow(i).createCell(j);
 					CellStyle style = getDefaultCellStyle(workbook);
 					style.setFillForegroundColor(IndexedColors.GREY_40_PERCENT.getIndex());
 					style.setFillPattern(CellStyle.SOLID_FOREGROUND);
-					
 					newCell.setCellStyle(style);
 				}
+			}
+			
+			if(!b.hasMinimum()){
+				CellStyle style = getDefaultCellStyle(workbook);
+				style.setFillForegroundColor(IndexedColors.GREY_40_PERCENT.getIndex());
+				style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+				style.setBorderRight(CellStyle.BORDER_MEDIUM);
+				newCell.setCellStyle(style);
 			}
 		}
 		
 	}
 
 	private void setMinimumColumn(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker broker, int brokerIndex) {
-		int column = config.getGridValuesFirstCell().getColumn() + brokerIndex + broker.getSuppliersList().size();
+		int column = brokerIndex + broker.getSuppliersList().size();
 		int row = config.getGridValuesFirstCell().getRow()-1;
-		String colLetter = config.getGridValuesFirstCell().getExcelColumn(); // TODO: Letra do k? Será k isto do excel agr é msm necessário ou é melhor fazer a conversão
+		String columnLetter = CellReference.convertNumToColString(brokerIndex);
 		
 		// Set the Minimum function
 		for (int i = 0; i< config.getGroupsList().size(); i++) { 	
@@ -330,7 +306,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 			CellStyle minimumCellStyle = getDefaultCellStyle(workbook);
 			minimumCellStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
 			minimum.setCellStyle(minimumCellStyle);
-			minimum.setCellFormula("MIN(" + colLetter + (row+1) +":INDIRECT(ADDRESS(ROW(),COLUMN()-1,4)))");
+			minimum.setCellFormula("MIN(" + columnLetter + (row+1) +":INDIRECT(ADDRESS(ROW(),COLUMN()-1,4)))");
 			minimum.setCellType(Cell.CELL_TYPE_FORMULA);
 		}
 		
@@ -340,6 +316,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		CellStyle minimumHeaderStyle = getDefaultCellStyle(workbook);
 		minimumHeaderStyle.setBorderBottom(CellStyle.BORDER_MEDIUM);
 		minimumHeaderStyle.setBorderTop(CellStyle.BORDER_MEDIUM);
+		minimumHeaderStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
 		mininumHeader.setCellStyle(minimumHeaderStyle);
 		
 		mininumHeader.setCellValue(broker.getMinimumColumnName());
@@ -417,13 +394,12 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	 * @param doDate The end date
 	 * @throws IOException When can't create the file
 	 */
-	private void saveFile(Workbook workbook, RateShopUKReportInfo reportInfo) throws IOException{
+	private void saveFile(Workbook workbook, RateShopUKReportInfo reportInfo, Calendar reportDate, Country country) throws IOException{
 		FileOutputStream out;
 		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy HH_mm");
-		Calendar cal = Calendar.getInstance();
 		
-		// TODO: Specify output file location
-		out = new FileOutputStream(String.format("R %s RATE_SHOP_UK_%s_%s_A_%s.xlsx", dateFormat.format(cal.getTime()), reportInfo.getDestination(), getDate(reportInfo.getStartDate()), getDate(reportInfo.getEndDate())));
+		// TODO: Specify output file location and country???
+		out = new FileOutputStream(String.format("R %s RATE_SHOP_UK_%s_%s_A_%s.xlsx", dateFormat.format(reportDate.getTime()), reportInfo.getDestination(), getDate(reportInfo.getStartDate()), getDate(reportInfo.getEndDate())));
 	
 		XSSFFormulaEvaluator.evaluateAllFormulaCells((XSSFWorkbook)workbook);
 		workbook.write(out);

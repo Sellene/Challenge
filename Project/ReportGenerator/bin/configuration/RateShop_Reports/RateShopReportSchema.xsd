@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="TemplateConfiguration">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="Template">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="Filename">
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:minLength value="1"/>
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="Sheet">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="Number">
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:int">
+                                        <xs:minInclusive value="0"/>
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="Destination" type="ExcelType"/>
+                <xs:element name="Month" type="ExcelType"/>
+                <xs:element name="Days" type="ExcelType"/>
+                <xs:element name="ConversionRate" type="ExcelType"/>
+                <xs:element name="Generate">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="Begin" type="ExcelType"/>
+                            <xs:element name="Brokers">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="Broker" minOccurs="1" maxOccurs="unbounded">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="Suppliers">
+                                                        <xs:complexType>
+                                                            <xs:sequence>
+                                                                <xs:element name="Supplier" minOccurs="0" maxOccurs="unbounded">
+                                                                    <xs:complexType>
+                                                                        <xs:sequence>
+                                                                            <xs:element name="Name" type="xs:string" />
+                                                                        </xs:sequence>
+                                                                    </xs:complexType>
+                                                                </xs:element>
+                                                            </xs:sequence>
+                                                            
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                                <xs:attribute name="name" type="xs:string"/>
+                                                <xs:attribute name="hasMinimum" type="xs:boolean"/>
+                                                <xs:attribute name="minimumName" type="xs:string" use="optional"/>
+                                            </xs:complexType>
+                                        </xs:element>                               
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                            
+                            <xs:element name="Groups">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="Group" minOccurs="1" maxOccurs="unbounded">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="Name" type="xs:string" />
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:complexType name="ExcelType">
+        <xs:sequence>
+            <xs:element name="Column" type="ColumnType"/>
+            <xs:element name="Row" type="RowType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:simpleType name="ColumnType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([A-Z])+"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="RowType">
+        <xs:restriction base="xs:int">
+            <xs:minInclusive value="0"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

@@ -11,12 +11,12 @@ public class CrossReference {
 	/**
 	 * Defines the row index
 	 */
-	private ExcelPair<Integer,Integer> _row;
+	private int _row;
 	
 	/**
 	 * Defines the column index
 	 */
-	private ExcelPair<String,Integer> _column;
+	private int _column;
 	
 	/**
 	 * Creates a instance of CrossReference
@@ -24,28 +24,11 @@ public class CrossReference {
 	 * @param row The index of the row
 	 * @param column The column of the row
 	 */
-	public CrossReference (ExcelPair<Integer,Integer> row, ExcelPair<String,Integer> column){
+	public CrossReference (int row, int column){
 		_row = row;
 		_column = column;
 	}
 	
-	/**
-	 * Gets the excel value for the row index
-	 * 
-	 * @return The row index
-	 */
-	public int getExcelRow(){
-		return _row.getExcelValue();
-	}
-	
-	/**
-	 * Gets the excel value for the column index
-	 * 
-	 * @return The column index
-	 */
-	public String getExcelColumn(){
-		return _column.getExcelValue();
-	}
 	
 	/**
 	 * Gets the value for the row index
@@ -53,7 +36,7 @@ public class CrossReference {
 	 * @return The row index
 	 */
 	public int getRow(){
-		return _row.getActualValue();
+		return _row;
 	}
 	
 	/**
@@ -62,6 +45,6 @@ public class CrossReference {
 	 * @return The column index
 	 */
 	public int getColumn(){
-		return _column.getActualValue();
+		return _column;
 	}
 }
