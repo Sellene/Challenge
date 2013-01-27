@@ -39,12 +39,24 @@ public class RateShopReportConfiguration extends Configuration{
 	 */
 	private Map<String, CrossReference> _groupsMap;
 	
+	/**
+	 * The list of the groups' names
+	 */
 	private List<String> _groupsList;
 
+	/**
+	 * Contains all of the brokers
+	 */
 	private Map<String, Broker> _brokers;
 	
+	/**
+	 * The list of the brokers' names
+	 */
 	private List<String> _brokersList;
 
+	/**
+	 * The reference to the first cell that has values
+	 */
 	private CrossReference _gridValuesFirstCell;
 	
 	/**
@@ -111,12 +123,23 @@ public class RateShopReportConfiguration extends Configuration{
 	public void setDayCell(CrossReference c){
 		_dayCell = c;
 	}
-
+	
+	/**
+	 * Adds a broker's name to the list of brokers and a broker to the map of brokers
+	 * 
+	 * @param name broker's name
+	 * @param b broker to add
+	 */
 	public void addBroker(String name, Broker b){
 		_brokersList.add(name);
 		_brokers.put(name, b);
 	}
 	
+	/**
+	 * Gets the map of brokers
+	 * 
+	 * @return the map of brokers
+	 */
 	public Map<String, Broker> getBrokers(){
 		return _brokers;
 	}
@@ -141,26 +164,52 @@ public class RateShopReportConfiguration extends Configuration{
 		_groupsMap.put(group, crossReference);
 	}
 	
+	/**
+	 * Gets the list of brokers
+	 * 
+	 * @return the list of brokers
+	 */
 	public List<String> getBrokersList(){
 		return _brokersList;
 	}
 	
+	/**
+	 * Gets the list of groups
+	 * 
+	 * @return the list of groups
+	 */
 	public List<String> getGroupsList(){
 		return _groupsList;
 	}
 	
+	/**
+	 * Gets the first cell of the groups
+	 * 
+	 * @return the first cell of the groups
+	 */
 	public CrossReference getGroupsBeginningCell() {
 		return _groupsBeginningCell;
 	}
 
+	/**
+	 * Sets the first cell of the groups
+	 */
 	public void setGroupsBeginningCell(CrossReference _groupsBeginningCell) {
 		this._groupsBeginningCell = _groupsBeginningCell;
 	}
 
+	/**
+	 * Gets the first cell of the values
+	 * 
+	 * @return the first cell of the values
+	 */
 	public CrossReference getGridValuesFirstCell() {
 		return _gridValuesFirstCell;
 	}
 
+	/**
+	 * Sets the first cell of the values
+	 */
 	public void setGridValuesFirstCell(CrossReference _gridValuesFirstCell) {
 		this._gridValuesFirstCell = _gridValuesFirstCell;
 	}

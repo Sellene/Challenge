@@ -36,6 +36,9 @@ public class Broker {
 	 */
 	private List<String> _suppliersHeader;
 	
+	/**
+	 * List of the broker's products
+	 */
 	private List<Product> _brokerProducts;
 	
 	/**
@@ -98,23 +101,35 @@ public class Broker {
 	}
 
 	/**
-	 * @return 
+	 * Gets the flag that indicates if the broker should have a minimum column
+	 * 
+	 * @return the value for _hasMinimum
 	 */
 	public boolean hasMinimum() {
 		return _hasMinimum;
 	}
 
 	/**
-	 * @return
+	 * Gets the name of the minimum column
+	 * 
+	 * @return the value of _minColumnName
 	 */
 	public String getMinimumColumnName() {
 		return _minColumnName;
 	}
 
+	/**
+	 * Gets the list of the broker's products
+	 * 
+	 * @return the value of _brokerProducts
+	 */
 	public List<Product> getProducts() {
 		return _brokerProducts;
 	}
 
+	/**
+	 * Adds a product to the list of products
+	 */
 	public void addProduct(Product product) {
 		_brokerProducts.add(product);
 	}

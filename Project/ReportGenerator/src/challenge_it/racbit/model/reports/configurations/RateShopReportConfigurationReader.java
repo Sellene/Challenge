@@ -7,6 +7,12 @@ import org.w3c.dom.NodeList;
 
 public class RateShopReportConfigurationReader extends ConfigurationReader{
 
+	/**
+	 * Reads the XML file and retrieves all the information
+	 * 
+	 * @param doc The representation of the XML file
+	 * @return an instance of Configuration that has the information read from XML file
+	 */
 	@Override
 	protected Configuration getConfiguration(Document doc) {
 		final int FIRST_IDX = 0;
