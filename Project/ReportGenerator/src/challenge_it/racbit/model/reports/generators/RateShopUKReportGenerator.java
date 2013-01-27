@@ -44,9 +44,27 @@ import challenge_it.racbit.model.reports.exchangeRate.ExchangeRateService;
  */
 public class RateShopUKReportGenerator implements IReportGenerator {
 	
+	/**
+	 * Class that represents the basic information for an UK Report
+	 * 
+	 *  @author Cátia Moreira e João Taborda
+	 *
+	 */
 	private class RateShopUKReportInfo{
+		
+		/**
+		 * The start date of the report
+		 */
 		private Calendar _startDate;
+		
+		/**
+		 * The end date of the report
+		 */
 		private Calendar _endDate;
+		
+		/**
+		 * The destination referred by the report
+		 */
 		private String _destination;
 		
 		public RateShopUKReportInfo(Calendar doDate, Calendar puDate, String destination){
@@ -55,26 +73,73 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 			_destination = destination;
 		}
 		
+		/**
+		 * Gets the start date
+		 * 
+		 * @return the start date
+		 */
 		public Calendar getStartDate(){
 			return _startDate;
 		}
 		
+		/**
+		 * Gets the end date
+		 * 
+		 * @return the end date
+		 */
 		public Calendar getEndDate(){
 			return _endDate;
 		}
 		
+		/**
+		 * Gets the destination
+		 * 
+		 * @return the destination
+		 */
 		public String getDestination(){
 			return _destination;
 		}
 	}
 	
-	
+	/**
+	 * Path to the xml configuration file
+	 */
 	private static final String XML_CONFIGURATION = "configuration/RateShop_Reports/UK_Reports/RateShopUKReportConfiguration.xml";
+	
+	/**
+	 * Path to the xml schema file
+	 */
 	private static final String XML_SCHEMA = "configuration/RateShop_Reports/RateShopReportSchema.xsd";
+	
+	/**
+	 * Path to the xml transformation file
+	 */
 	private static final String XML_TRANSFORMATION = "configuration/ReportTransformation.xsl";
 	
+	/**
+	 * Path where the templates are saved
+	 */
 	private static final String PATH = "templates/";
 	
+	/**
+	 * Generates the UK report
+	 * 
+	 * The execution order is as follows:
+	 * 1. Read XML configuration file and apply the schema and the transformation using RateShopReportConfiguration class
+	 * 2. Set the info used by RateShopUKReportInfo 
+	 * 3. Combine the information obtained from XML file with the information from the iterator to fill the table with the values 
+	 * 3.1. The styles for the table cells are applied at the same time
+	 * 3.2. The column used for minimum values is created separately for each broker 
+	 * 3.3. The line that has the suppliers names is also created for each broker
+	 * 3.4. Because the table could have more than one broker, there is a pointer that should be set after the steps above
+	 * 4. Fill the column with the groups names
+	 * 5. Save the file
+	 * 
+	 * @param reportDate The date that should be on the file name
+	 * @param country The country that should be on the file name
+	 * @param results The iterator which have the values used to fill the table
+	 * @throws ReportGenerationException, CurrencyConversionException
+	 */
 	@Override
 	public void generate(Calendar reportDate, Country country, Iterable<Product> results) throws ReportGenerationException, CurrencyConversionException {
 		try {
@@ -84,9 +149,6 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 			Workbook workbook = new XSSFWorkbook(RateShopUKReportGenerator.class.getClassLoader().getResourceAsStream(PATH + config.getTemplateFilename()));
 			Sheet sheet = workbook.getSheetAt(config.getSheetNumber());
 			
-			// Gets from the result the complete information about a broker
-			// This is used to know the concrete number of suppliers each broker
-			// This method also returns the information about the destination and the days to fill the report values
 			RateShopUKReportInfo reportInfo = completeBrokerInformation(config, results);
 			
 			setFixedValues(sheet, config, reportInfo);
@@ -126,7 +188,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 					setMinimumColor(workbook, sheet, config, brokerFirstSupplierIndex, broker);
 				}
 				
-				setTableCells(workbook, sheet, config, broker, brokerFirstSupplierIndex);
+				setTableCellsWithoutValue(workbook, sheet, config, broker, brokerFirstSupplierIndex);
 
 				fillSuppliersHeader(workbook, sheet, config.getGridValuesFirstCell(), brokerFirstSupplierIndex, broker);
 				
@@ -144,6 +206,13 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		}
 	}
 	
+	/**
+	 * Fills the groups' column with the names
+	 * 
+	 * @param workbook The representation of the file
+	 * @param sheet The representation of the sheet
+	 * @param config The object that holds the information read from XML file
+	 */
 	private void fillGroups(Workbook workbook, Sheet sheet, RateShopReportConfiguration config) {
 		int row = config.getGridValuesFirstCell().getRow();
 		int column = config.getGridValuesFirstCell().getColumn()-1;
@@ -158,9 +227,18 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		}
 	}
 
+	/**
+	 * Fills the suppliers' line with the names
+	 * 
+	 * @param workbook The representation of the file
+	 * @param sheet The representation of the sheet
+	 * @param firstCellOfTheGrid Represents the first cell that has numeric values
+	 * @param brokerIndex The index of the designated broker
+	 * @param broker The broker that has the suppliers
+	 */
 	private void fillSuppliersHeader(Workbook workbook, Sheet sheet, CrossReference firstCellOfTheGrid, int brokerIndex, Broker broker) {
 
-		int row = firstCellOfTheGrid.getRow()-1;
+		int row = firstCellOfTheGrid.getRow()-1; //Refers to the line above the firstCellOfTheGrid
 		
 		Cell supplierCell = null;
 
@@ -205,6 +283,14 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	    ));
 	}
 
+	/**
+	 * Gets the complete information about a broker from the results
+	 * This is used to know the concrete number of suppliers each broker
+	 * 
+	 * @param config The object that holds the information read from XML file
+	 * @param results The iterator which have the values used to fill the table
+	 * @return the information about the destination and the days to fill the report values
+	 */
 	private RateShopUKReportInfo completeBrokerInformation(RateShopReportConfiguration config, Iterable<Product> results) {
 		RateShopUKReportInfo reportInfo = null;
 		
@@ -238,6 +324,16 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		return reportInfo;
 	}
 
+	/**
+	 * Gets the complete information about a broker from the results
+	 * This is used to know the concrete number of suppliers each broker
+	 * 
+	 * @param workbook The representation of the file
+	 * @param sheet The representation of the sheet
+	 * @param config The object that holds the information read from XML file
+	 * @param brokerIndex The index of the designated broker
+	 * @param broker The broker that has the suppliers
+	 */
 	private void setMinimumColor(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, int brokerIndex, Broker broker) {
 		int lastColumn = brokerIndex + broker.getSuppliersList().size();
 		int firstRow = config.getGridValuesFirstCell().getRow();
@@ -264,7 +360,16 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		}		
 	}
 
-	private void setTableCells(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker b, int firstColumn) {
+	/**
+	 * Searches the table for cells that doesn't have any value and creates them with a specific style
+	 * 
+	 * @param workbook The representation of the file
+	 * @param sheet The representation of the sheet
+	 * @param config The object that holds the information read from XML file
+	 * @param b The broker which table will be read
+	 * @param firstColumn The initial column to start read
+	 */
+	private void setTableCellsWithoutValue(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker b, int firstColumn) {
 		
 		int lastColumn = firstColumn + b.getSuppliersList().size();
 			
@@ -295,6 +400,15 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		
 	}
 
+	/**
+	 * Used to create a minimum column for brokers that requires it
+	 * 
+	 * @param workbook The representation of the file
+	 * @param sheet The representation of the sheet
+	 * @param config The object that holds the information read from XML file
+	 * @param broker The broker that has the suppliers
+	 * @param brokerIndex The index of the designated broker
+	 */
 	private void setMinimumColumn(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker broker, int brokerIndex) {
 		int column = brokerIndex + broker.getSuppliersList().size();
 		int row = config.getGridValuesFirstCell().getRow()-1;
@@ -310,7 +424,6 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 			minimum.setCellType(Cell.CELL_TYPE_FORMULA);
 		}
 		
-
 		// Define the Minimum header with the name in the XML Configuration 
 		Cell mininumHeader = sheet.getRow(config.getGridValuesFirstCell().getRow()-1).createCell(column);
 		CellStyle minimumHeaderStyle = getDefaultCellStyle(workbook);
@@ -324,6 +437,12 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		
 	}		
 
+	/**
+	 * Gets the default style used for the cells that contains values
+	 * 
+	 * @param workbook The representation of the file
+	 * @return the default cell style
+	 */
 	private CellStyle getDefaultCellStyle(Workbook workbook) {
 		CellStyle style = workbook.createCellStyle();
 		style.setFillForegroundColor(IndexedColors.WHITE.getIndex());
@@ -344,7 +463,6 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		
 		return style;
 	}
-
 
 	/**
 	 * Set the fixed values in the report (Destination, Month, Days, Broker and Conversion Rate)
@@ -385,7 +503,6 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		
 	}
 
-	
 	/**
 	 * Saves a XLSX Report with a specific name
 	 * 
