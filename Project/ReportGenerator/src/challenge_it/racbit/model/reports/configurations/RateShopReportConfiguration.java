@@ -59,6 +59,8 @@ public class RateShopReportConfiguration extends Configuration{
 	 */
 	private CrossReference _gridValuesFirstCell;
 	
+	private int _conversionTableOffset;
+	
 	/**
 	 * Creates an instance of Configuration
 	 */
@@ -212,5 +214,15 @@ public class RateShopReportConfiguration extends Configuration{
 	 */
 	public void setGridValuesFirstCell(CrossReference _gridValuesFirstCell) {
 		this._gridValuesFirstCell = _gridValuesFirstCell;
+	}
+
+
+	public int getConversionTableOffset() {
+		return _conversionTableOffset;
+	}
+
+
+	public void setConversionTableOffset(int conversionTableOffset) {
+		_conversionTableOffset = conversionTableOffset;
 	}
 }

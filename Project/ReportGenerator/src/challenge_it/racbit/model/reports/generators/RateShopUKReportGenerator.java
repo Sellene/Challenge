@@ -15,6 +15,7 @@ import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.ComparisonOperator;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -161,26 +162,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 				
 				for (Product product : broker.getProducts()) {
 					
-					CrossReference supplierCell = broker.getSuppliersMap().get(product.getSupplier());
-					CrossReference groupCell =  config.getGroupsMap().get(product.getGroup().toString());
-					
-					
-					if(supplierCell != null && groupCell != null)
-					{
-						Cell newCell = sheet.getRow(groupCell.getRow()).createCell(supplierCell.getColumn() + brokerFirstSupplierIndex);
-						
-						CellStyle style = getDefaultCellStyle(workbook);
-		
-						if(product.getInsurancePackage() == InsurancePackage.NO_EXCESS)
-							style.setFillForegroundColor(HSSFColor.YELLOW.index);
-						else 
-							if(product.getInsurancePackage() == InsurancePackage.FULLY_REFUNDABLE)
-								style.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
-		
-						newCell.setCellStyle(style);
-						newCell.setCellValue(product.getPrice());
-						newCell.setCellType(Cell.CELL_TYPE_NUMERIC);
-					}
+					setProductCell(workbook, sheet, config, broker, brokerFirstSupplierIndex, product);
 				}
 				
 				if(broker.hasMinimum()){
@@ -190,7 +172,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 				
 				setTableCellsWithoutValue(workbook, sheet, config, broker, brokerFirstSupplierIndex);
 
-				fillSuppliersHeader(workbook, sheet, config.getGridValuesFirstCell(), brokerFirstSupplierIndex, broker);
+				fillSuppliersHeader(workbook, sheet, config, brokerFirstSupplierIndex, broker);
 				
 				brokerFirstSupplierIndex += broker.getSuppliersList().size() + (broker.hasMinimum()?1:0);
 			}
@@ -205,7 +187,50 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 			throw new ReportGenerationException(e);
 		}
 	}
-	
+
+	private void setProductCell(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker broker, int brokerFirstCell, Product product) {
+		CrossReference supplierCell = broker.getSuppliersMap().get(product.getSupplier());
+		CrossReference groupCell =  config.getGroupsMap().get(product.getGroup().toString());
+		
+		if(supplierCell != null && groupCell != null)
+		{
+			
+			//TODO
+			Row poundRow = sheet.getRow(groupCell.getRow());
+			Row euroRow = sheet.getRow(groupCell.getRow() + config.getConversionTableOffset());
+			
+			if(poundRow == null)
+				poundRow = sheet.createRow(groupCell.getRow());
+			
+			if(euroRow == null)
+				euroRow = sheet.createRow(groupCell.getRow() + config.getConversionTableOffset());
+			
+			
+			Cell cellWithPoundValue = poundRow.createCell(supplierCell.getColumn() + brokerFirstCell);
+			Cell cellWithEuroValue = euroRow.createCell(supplierCell.getColumn() + brokerFirstCell);
+			
+			CellStyle style = getDefaultCellStyle(workbook);
+			style.setDataFormat(workbook.createDataFormat().getFormat("0.00"));
+
+			if(product.getInsurancePackage() == InsurancePackage.NO_EXCESS)
+				style.setFillForegroundColor(HSSFColor.YELLOW.index);
+			else 
+				if(product.getInsurancePackage() == InsurancePackage.FULLY_REFUNDABLE)
+					style.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
+
+			cellWithPoundValue.setCellStyle(style);
+			cellWithPoundValue.setCellValue(product.getPrice());
+			cellWithPoundValue.setCellType(Cell.CELL_TYPE_NUMERIC);
+			
+			
+			cellWithEuroValue.setCellFormula(CellReference.convertNumToColString(supplierCell.getColumn() + brokerFirstCell) + (groupCell.getRow()+1)
+					+ "/" + CellReference.convertNumToColString(config.getRateCell().getColumn()) + (config.getRateCell().getRow()+1));
+			cellWithEuroValue.setCellType(Cell.CELL_TYPE_FORMULA);
+			cellWithEuroValue.setCellStyle(style);
+			
+		}
+	}
+
 	/**
 	 * Fills the groups' column with the names
 	 * 
@@ -218,12 +243,32 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		int column = config.getGridValuesFirstCell().getColumn()-1;
 		
 		for (String  group : config.getGroupsList()) {
-			Cell groupCell = sheet.getRow(row++).createCell(column);
+			
+			//TODO
+			Row poundRow = sheet.getRow(row);
+			Row euroRow = sheet.getRow(row + config.getConversionTableOffset());
+			
+			if(poundRow == null)
+				poundRow = sheet.createRow(row);
+			
+			if(euroRow == null)
+				euroRow = sheet.createRow(row + config.getConversionTableOffset())
+			
+			Cell poundGroup = poundRow.createCell(column);
+			Cell euroGroup = euroRow.createCell(column);
+			
 			CellStyle groupCellStyle = getDefaultCellStyle(workbook);
 			groupCellStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
-			groupCell.setCellStyle(groupCellStyle);
-			groupCell.setCellValue(group);
-			groupCell.setCellType(Cell.CELL_TYPE_STRING);
+			
+			poundGroup.setCellStyle(groupCellStyle);
+			poundGroup.setCellValue(group);
+			poundGroup.setCellType(Cell.CELL_TYPE_STRING);
+			
+			euroGroup.setCellStyle(groupCellStyle);
+			euroGroup.setCellValue(group);
+			euroGroup.setCellType(Cell.CELL_TYPE_STRING);
+			
+			row++;
 		}
 	}
 
@@ -233,52 +278,98 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	 * @param workbook The representation of the file
 	 * @param sheet The representation of the sheet
 	 * @param firstCellOfTheGrid Represents the first cell that has numeric values
-	 * @param brokerIndex The index of the designated broker
+	 * @param brokerFirstCell The index of the designated broker
 	 * @param broker The broker that has the suppliers
 	 */
-	private void fillSuppliersHeader(Workbook workbook, Sheet sheet, CrossReference firstCellOfTheGrid, int brokerIndex, Broker broker) {
+	private void fillSuppliersHeader(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, int brokerFirstCell, Broker broker) {
 
-		int row = firstCellOfTheGrid.getRow()-1; //Refers to the line above the firstCellOfTheGrid
+		int suppliersPoundRow = config.getGridValuesFirstCell().getRow()-1; //Refers to the line above the firstCellOfTheGrid
+		int suppliersEuroRow = suppliersPoundRow + config.getConversionTableOffset();
 		
-		Cell supplierCell = null;
+		Cell poundSuppliers = null;
+		Cell euroSuppliers = null;
 
 		for (String  supplier : broker.getSuppliersList()) {
 			CellStyle supplierCellStyle = getDefaultCellStyle(workbook);
 			supplierCellStyle.setBorderBottom(CellStyle.BORDER_MEDIUM);
 			
-			supplierCell = sheet.getRow(row).createCell(brokerIndex + broker.getSuppliersMap().get(supplier).getColumn());
-			supplierCell.setCellStyle(supplierCellStyle);
-			supplierCell.setCellValue(supplier);
-			supplierCell.setCellType(Cell.CELL_TYPE_STRING);
+			//TODO
+			Row poundRow = sheet.getRow(suppliersPoundRow);
+			Row euroRow = sheet.getRow(suppliersEuroRow);
+			
+			if(poundRow == null)
+				poundRow = sheet.createRow(suppliersPoundRow);
+			
+			if(euroRow == null)
+				euroRow = sheet.createRow(suppliersEuroRow);
+			
+			poundSuppliers = poundRow.createCell(brokerFirstCell + broker.getSuppliersMap().get(supplier).getColumn());
+			poundSuppliers.setCellStyle(supplierCellStyle);
+			poundSuppliers.setCellValue(supplier);
+			poundSuppliers.setCellType(Cell.CELL_TYPE_STRING);
+			
+			euroSuppliers = euroRow.createCell(brokerFirstCell + broker.getSuppliersMap().get(supplier).getColumn());
+			euroSuppliers.setCellStyle(supplierCellStyle);
+			euroSuppliers.setCellValue(supplier);
+			euroSuppliers.setCellType(Cell.CELL_TYPE_STRING);
 		}
 		
 		if(!broker.hasMinimum()){
 			CellStyle supplierCellStyle = getDefaultCellStyle(workbook);
 			supplierCellStyle.setBorderBottom(CellStyle.BORDER_MEDIUM);
 			supplierCellStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
-			supplierCell.setCellStyle(supplierCellStyle);
+			
+			poundSuppliers.setCellStyle(supplierCellStyle);
+			euroSuppliers.setCellStyle(supplierCellStyle);
 		}
 
+		setBrokerHeader(workbook, sheet, broker, brokerFirstCell, suppliersEuroRow, suppliersPoundRow);
+		
+	}
+
+	private void setBrokerHeader(Workbook workbook, Sheet sheet, Broker broker, int brokerFirstCell, int suppliersEuroRow, int suppliersPoundRow) {
 		CellStyle brokerCellStyle = getDefaultCellStyle(workbook);
 		brokerCellStyle.setBorderBottom(CellStyle.BORDER_MEDIUM);
 		brokerCellStyle.setBorderTop(CellStyle.BORDER_MEDIUM);
 		brokerCellStyle.setBorderLeft(CellStyle.BORDER_MEDIUM);
 		brokerCellStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
 		
-		Cell brokerName = sheet.getRow(row-1).createCell(brokerIndex);
-		brokerName.setCellValue(broker.getName());
-		brokerName.setCellStyle(brokerCellStyle);
+		//TODO
+		Row poundRow = sheet.getRow(suppliersPoundRow-1);
+		Row euroRow = sheet.getRow(suppliersEuroRow-1)
 		
-		int lastColumn = brokerIndex + broker.getSuppliersList().size() + (broker.hasMinimum()?0:-1);
+		if(poundRow == null)
+			poundRow = sheet.createRow(suppliersPoundRow-1);
 		
-		for(int i = brokerIndex+1; i <= lastColumn;i++){
-			sheet.getRow(row-1).createCell(i).setCellStyle(brokerCellStyle);
+		if(euroRow == null)
+			euroRow = sheet.createRow(suppliersEuroRow-1);
+		
+		Cell poundBrokerCell = poundRow.createCell(brokerFirstCell);
+		poundBrokerCell.setCellValue(broker.getName());
+		poundBrokerCell.setCellStyle(brokerCellStyle);
+		
+		Cell euroBrokerCell = euroRow.createCell(brokerFirstCell);
+		euroBrokerCell.setCellValue(broker.getName());
+		euroBrokerCell.setCellStyle(brokerCellStyle);
+		
+		int lastColumn = brokerFirstCell + broker.getSuppliersList().size() + (broker.hasMinimum()?0:-1);
+		
+		for(int i = brokerFirstCell+1; i <= lastColumn;i++){
+			poundRow.createCell(i).setCellStyle(brokerCellStyle);
+			euroRow.createCell(i).setCellStyle(brokerCellStyle);
 		}
 		
 		sheet.addMergedRegion(new CellRangeAddress(
-	            row-1, //first row (0-based)
-	            row-1, //last row  (0-based)
-	            brokerIndex, //first column (0-based)
+	            suppliersPoundRow-1, //first row (0-based)
+	            suppliersPoundRow-1, //last row  (0-based)
+	            brokerFirstCell, //first column (0-based)
+	            lastColumn  //last column  (0-based)
+	    ));
+		
+		sheet.addMergedRegion(new CellRangeAddress(
+				suppliersEuroRow-1, //first row (0-based)
+				suppliersEuroRow-1, //last row  (0-based)
+	            brokerFirstCell, //first column (0-based)
 	            lastColumn  //last column  (0-based)
 	    ));
 	}
@@ -331,32 +422,43 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	 * @param workbook The representation of the file
 	 * @param sheet The representation of the sheet
 	 * @param config The object that holds the information read from XML file
-	 * @param brokerIndex The index of the designated broker
+	 * @param brokerFirstCell The index of the designated broker
 	 * @param broker The broker that has the suppliers
 	 */
-	private void setMinimumColor(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, int brokerIndex, Broker broker) {
-		int lastColumn = brokerIndex + broker.getSuppliersList().size();
+	private void setMinimumColor(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, int brokerFirstCell, Broker broker) {
+		int lastColumn = brokerFirstCell + broker.getSuppliersList().size();
 		int firstRow = config.getGridValuesFirstCell().getRow();
 		
 		for(int i = firstRow; i < firstRow+config.getGroupsList().size(); i++){
 			
-			CellValue cellMinimumValue = workbook.getCreationHelper().createFormulaEvaluator().evaluate(sheet.getRow(i).getCell(lastColumn));
+			CellValue cellEuroMinimumValue = workbook.getCreationHelper().createFormulaEvaluator().evaluate(sheet.getRow(i).getCell(lastColumn));
+			CellValue cellPoundMinimumValue = workbook.getCreationHelper().createFormulaEvaluator().evaluate(sheet.getRow(i+config.getConversionTableOffset()).getCell(lastColumn));
 			
 			SheetConditionalFormatting cf = sheet.getSheetConditionalFormatting();
-			XSSFConditionalFormattingRule rule = (XSSFConditionalFormattingRule) cf.createConditionalFormattingRule(
+
+			XSSFConditionalFormattingRule euroRule = (XSSFConditionalFormattingRule) cf.createConditionalFormattingRule(
 			     ComparisonOperator.EQUAL, 
-			     cellMinimumValue.getNumberValue() + "",
+			     cellEuroMinimumValue.getNumberValue() + "",
 			     null
 			);
+			
+			XSSFConditionalFormattingRule poundRule = (XSSFConditionalFormattingRule) cf.createConditionalFormattingRule(
+				     ComparisonOperator.EQUAL, 
+				     cellPoundMinimumValue.getNumberValue() + "",
+				     null
+				);
 
 			 // Create pattern with red background
-			rule.createFontFormatting().setFontColorIndex(HSSFColor.RED.index);
+			euroRule.createFontFormatting().setFontColorIndex(HSSFColor.RED.index);
+			poundRule.createFontFormatting().setFontColorIndex(HSSFColor.RED.index);
 
 			 // Define a region containing first column
-			CellRangeAddress[] cra = {new CellRangeAddress(i, i, brokerIndex, lastColumn-1) };
-
-			 // Apply Conditional Formatting rule defined above to the regions  
-			cf.addConditionalFormatting(cra, rule);
+			CellRangeAddress[] euroCRA = {new CellRangeAddress(i, i, brokerFirstCell, lastColumn-1) };
+			CellRangeAddress[] poundCRA = {new CellRangeAddress(i+config.getConversionTableOffset(), i+config.getConversionTableOffset(), brokerFirstCell, lastColumn-1) };
+			
+			// Apply Conditional Formatting rule defined above to the regions  
+			cf.addConditionalFormatting(euroCRA, euroRule);
+			cf.addConditionalFormatting(poundCRA, poundRule);
 		}		
 	}
 
@@ -367,26 +469,42 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	 * @param sheet The representation of the sheet
 	 * @param config The object that holds the information read from XML file
 	 * @param b The broker which table will be read
-	 * @param firstColumn The initial column to start read
+	 * @param brokerFirstCell The initial column to start read
 	 */
-	private void setTableCellsWithoutValue(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker b, int firstColumn) {
+	private void setTableCellsWithoutValue(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker b, int brokerFirstCell) {
 		
-		int lastColumn = firstColumn + b.getSuppliersList().size();
+		int lastColumn = brokerFirstCell + b.getSuppliersList().size();
 			
 		for(int i = config.getGridValuesFirstCell().getRow(); i < config.getGridValuesFirstCell().getRow() + config.getGroupsList().size(); i++)
 		{
-			Cell newCell = null;
+			Cell poundCell = null;
+			Cell euroCell = null;
 			
-			for(int j = firstColumn; j < lastColumn ; j++)
+			for(int j = brokerFirstCell; j < lastColumn ; j++)
 			{
+				//TODO
+				Row poundRow = sheet.getRow(i);
+				Row euroRow = sheet.getRow(suppliersEuroRow);
+				
+				if(poundRow == null)
+					poundRow = sheet.createRow(i);
+				
+				if(euroRow == null)
+					euroRow = sheet.createRow(suppliersEuroRow);
+				
 				if(sheet.getRow(i).getCell(j) == null)
 				{
-					newCell = sheet.getRow(i).createCell(j);
 					CellStyle style = getDefaultCellStyle(workbook);
 					style.setFillForegroundColor(IndexedColors.GREY_40_PERCENT.getIndex());
 					style.setFillPattern(CellStyle.SOLID_FOREGROUND);
-					newCell.setCellStyle(style);
+					
+					poundCell = poundRow.createCell(j);
+					euroCell = sheet.getRow(i + config.getConversionTableOffset()).createCell(j);
+					
+					poundCell.setCellStyle(style);
+					euroCell.setCellStyle(style);
 				}
+				
 			}
 			
 			if(!b.hasMinimum()){
@@ -394,7 +512,9 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 				style.setFillForegroundColor(IndexedColors.GREY_40_PERCENT.getIndex());
 				style.setFillPattern(CellStyle.SOLID_FOREGROUND);
 				style.setBorderRight(CellStyle.BORDER_MEDIUM);
-				newCell.setCellStyle(style);
+				
+				poundCell.setCellStyle(style);
+				euroCell.setCellStyle(style);
 			}
 		}
 		
@@ -407,33 +527,49 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	 * @param sheet The representation of the sheet
 	 * @param config The object that holds the information read from XML file
 	 * @param broker The broker that has the suppliers
-	 * @param brokerIndex The index of the designated broker
+	 * @param brokerFirstCell The index of the designated broker
 	 */
-	private void setMinimumColumn(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker broker, int brokerIndex) {
-		int column = brokerIndex + broker.getSuppliersList().size();
+	private void setMinimumColumn(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker broker, int brokerFirstCell) {
+		int column = brokerFirstCell + broker.getSuppliersList().size();
 		int row = config.getGridValuesFirstCell().getRow()-1;
-		String columnLetter = CellReference.convertNumToColString(brokerIndex);
+		String columnLetter = CellReference.convertNumToColString(brokerFirstCell);
 		
 		// Set the Minimum function
 		for (int i = 0; i< config.getGroupsList().size(); i++) { 	
-			Cell minimum = sheet.getRow(++row).createCell(column);
+			row++;
+			
+			Cell euroMinimum = sheet.getRow(row).createCell(column);
+			Cell poundMinimum = sheet.getRow(row + config.getConversionTableOffset()).createCell(column);
+			
 			CellStyle minimumCellStyle = getDefaultCellStyle(workbook);
 			minimumCellStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
-			minimum.setCellStyle(minimumCellStyle);
-			minimum.setCellFormula("MIN(" + columnLetter + (row+1) +":INDIRECT(ADDRESS(ROW(),COLUMN()-1,4)))");
-			minimum.setCellType(Cell.CELL_TYPE_FORMULA);
+			minimumCellStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00"));
+			
+			euroMinimum.setCellStyle(minimumCellStyle);
+			euroMinimum.setCellFormula("MIN(" + columnLetter + (row+1) +":INDIRECT(ADDRESS(ROW(),COLUMN()-1,4)))");
+			euroMinimum.setCellType(Cell.CELL_TYPE_FORMULA);
+			
+			poundMinimum.setCellStyle(minimumCellStyle);
+			poundMinimum.setCellFormula("MIN(" + columnLetter + (row + config.getConversionTableOffset() +1) +":INDIRECT(ADDRESS(ROW(),COLUMN()-1,4)))");
+			poundMinimum.setCellType(Cell.CELL_TYPE_FORMULA);
 		}
 		
 		// Define the Minimum header with the name in the XML Configuration 
-		Cell mininumHeader = sheet.getRow(config.getGridValuesFirstCell().getRow()-1).createCell(column);
+		Cell euroMininumHeader = sheet.getRow(config.getGridValuesFirstCell().getRow()-1).createCell(column);
+		Cell poundMininumHeader = sheet.getRow(config.getGridValuesFirstCell().getRow()-1 +  config.getConversionTableOffset()).createCell(column);
+		
 		CellStyle minimumHeaderStyle = getDefaultCellStyle(workbook);
 		minimumHeaderStyle.setBorderBottom(CellStyle.BORDER_MEDIUM);
 		minimumHeaderStyle.setBorderTop(CellStyle.BORDER_MEDIUM);
 		minimumHeaderStyle.setBorderRight(CellStyle.BORDER_MEDIUM);
-		mininumHeader.setCellStyle(minimumHeaderStyle);
 		
-		mininumHeader.setCellValue(broker.getMinimumColumnName());
-		mininumHeader.setCellType(Cell.CELL_TYPE_STRING);
+		euroMininumHeader.setCellStyle(minimumHeaderStyle);
+		euroMininumHeader.setCellValue(broker.getMinimumColumnName());
+		euroMininumHeader.setCellType(Cell.CELL_TYPE_STRING);
+		
+		poundMininumHeader.setCellStyle(minimumHeaderStyle);
+		poundMininumHeader.setCellValue(broker.getMinimumColumnName());
+		poundMininumHeader.setCellType(Cell.CELL_TYPE_STRING);
 		
 	}		
 

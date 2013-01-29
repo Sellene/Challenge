@@ -29,8 +29,6 @@ public class RateShopReportConfigurationReader extends ConfigurationReader{
 		
 		configuration.setDayCell(getCell(doc.getElementsByTagName("Days").item(FIRST_IDX)));
 		
-		configuration.setRateCell(getCell(doc.getElementsByTagName("ConversionRate").item(FIRST_IDX)));
-		
 		CrossReference gridBeginCell = getCell(doc.getElementsByTagName("Generate").item(FIRST_IDX).getFirstChild());
 		configuration.setGridValuesFirstCell(gridBeginCell);
 		
@@ -65,7 +63,9 @@ public class RateShopReportConfigurationReader extends ConfigurationReader{
 			configuration.addGroup(groupNode.getFirstChild().getTextContent(), new CrossReference(gridBeginCell.getRow()+j, gridBeginCell.getColumn()-1));
 		}
 		
-
+		configuration.setRateCell(new CrossReference(gridBeginCell.getRow() + configuration.getGroupsList().size() + 1, gridBeginCell.getColumn()-1));
+		configuration.setConversionTableOffset(configuration.getGroupsList().size() + 4);
+		
 		return configuration;
 	}
 
