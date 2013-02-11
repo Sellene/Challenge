@@ -46,7 +46,7 @@
                     </Supplier>
                 </Suppliers>
             </Broker>
-            <Broker name = "kate" hasMinimum = "true" minimumName = "PB">
+            <Broker name = "kate" hasMinimum = "false">
                 <Suppliers>
                     <Supplier>
                         <Name>BGT</Name>

@@ -17,7 +17,7 @@ public class App {
 	/**
 	 * @param args
 	 */
-	@SuppressWarnings("deprecation")
+	
 	public static void main(String[] args) {
 
 		LinkedList<Product> list = new LinkedList<Product>();

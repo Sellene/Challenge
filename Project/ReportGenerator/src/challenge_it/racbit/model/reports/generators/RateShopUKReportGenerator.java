@@ -411,10 +411,13 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 			Cell poundCell = null;
 			Cell euroCell = null;
 			
+			Row poundRow = null;
+			Row euroRow = null;
+			
 			for(int j = brokerFirstCell; j < brokerFirstCell + broker.getSuppliersList().size() ; j++)
 			{
-				Row poundRow = sheet.getRow(i);
-				Row euroRow = sheet.getRow(i + config.getConversionTableOffset());
+				poundRow = sheet.getRow(i);
+				euroRow = sheet.getRow(i + config.getConversionTableOffset());
 				
 				if(poundRow == null)
 					poundRow = sheet.createRow(i);
@@ -439,8 +442,10 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 			}
 			
 			if(!broker.hasMinimum()){				
-				poundCell.setCellStyle(CellStyles.setBackground(CellStyles.setMediumRightBorder(CellStyles.setThinBorders(CellStyles.getDefaultCellStyle(workbook))),IndexedColors.GREY_40_PERCENT.getIndex()));
-				euroCell.setCellStyle(CellStyles.setBackground(CellStyles.setMediumRightBorder(CellStyles.setThinBorders(CellStyles.getDefaultCellStyle(workbook))),IndexedColors.GREY_40_PERCENT.getIndex()));
+				poundCell = poundRow.getCell(brokerFirstCell + broker.getSuppliersList().size() - 1);
+				poundCell.setCellStyle(CellStyles.setMediumRightBorder(poundCell.getCellStyle()));
+				euroCell = euroRow.getCell(brokerFirstCell + broker.getSuppliersList().size() - 1);
+				euroCell.setCellStyle(CellStyles.setMediumRightBorder(euroCell.getCellStyle()));
 			}
 		}
 		
