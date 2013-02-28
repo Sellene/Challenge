@@ -1,4 +1,4 @@
-package challenge_it.racbit.model.reports.configurations;
+package challenge_it.racbit.model.reports.generators.utils;
 
 
 /**

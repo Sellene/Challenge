@@ -30,11 +30,12 @@ import challenge_it.racbit.model.core.Product;
 import challenge_it.racbit.model.core.Product.InsurancePackage;
 import challenge_it.racbit.model.core.exceptions.CurrencyConversionException;
 import challenge_it.racbit.model.core.exceptions.ReportGenerationException;
-import challenge_it.racbit.model.reports.configurations.Broker;
-import challenge_it.racbit.model.reports.configurations.CrossReference;
 import challenge_it.racbit.model.reports.configurations.RateShopReportConfiguration;
 import challenge_it.racbit.model.reports.configurations.RateShopReportConfigurationReader;
 import challenge_it.racbit.model.reports.exchangeRate.ExchangeRateService;
+import challenge_it.racbit.model.reports.generators.utils.CellStyles;
+import challenge_it.racbit.model.reports.generators.utils.CrossReference;
+import challenge_it.racbit.model.reports.generators.utils.RateShopReportBroker;
 
 /**
  * Class that generates a RateShopUK Report
@@ -160,7 +161,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 				
 			for(String brokerName : config.getBrokersList())
 			{
-				Broker broker = config.getBrokers().get(brokerName);
+				RateShopReportBroker broker = config.getBrokers().get(brokerName);
 				
 				for (Product product : broker.getProducts()) 
 				{
@@ -202,7 +203,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	private RateShopUKReportInfo completeBrokerInformation(RateShopReportConfiguration config, Iterable<Product> results) {
 		RateShopUKReportInfo reportInfo = null;
 		
-		Map<String, Broker> brokers = config.getBrokers();
+		Map<String, RateShopReportBroker> brokers = config.getBrokers();
 		
 		for (Product product : results) {
 			
@@ -217,7 +218,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 				reportInfo = new RateShopUKReportInfo(puDate, doDate, product.getLocation());
 			}
 			
-			Broker b = brokers.get(product.getBroker());
+			RateShopReportBroker b = brokers.get(product.getBroker());
 			
 			if(b != null){
 				
@@ -242,7 +243,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	 * @param brokerFirstCell The index of the designated broker
 	 * @param product The object that holds the product information
 	 */
-	private void setProductCell(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker broker, int brokerFirstCell, Product product) {
+	private void setProductCell(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, RateShopReportBroker broker, int brokerFirstCell, Product product) {
 		CrossReference supplierCell = broker.getSuppliersMap().get(product.getSupplier());
 		CrossReference groupCell =  config.getGroupsMap().get(product.getGroup().toString());
 		
@@ -291,7 +292,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	 * @param broker The broker that has the suppliers
 	 * @param brokerFirstCell The index of the designated broker
 	 */
-	private void setMinimumColumn(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker broker, int brokerFirstCell) {
+	private void setMinimumColumn(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, RateShopReportBroker broker, int brokerFirstCell) {
 		final int column = brokerFirstCell + broker.getSuppliersList().size();
 		final String columnLetter = CellReference.convertNumToColString(brokerFirstCell);
 				
@@ -356,7 +357,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	 * @param broker The broker that has the suppliers
 	 * @param brokerFirstCell The index of the designated broker
 	 */
-	private void setMinimumColor(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker broker, int brokerFirstCell) {
+	private void setMinimumColor(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, RateShopReportBroker broker, int brokerFirstCell) {
 		final int lastColumn = brokerFirstCell + broker.getSuppliersList().size();
 		final int firstRow = config.getGridValuesFirstCell().getRow();
 		
@@ -402,7 +403,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	 * @param broker The broker which table will be read
 	 * @param brokerFirstCell The initial column to start read
 	 */
-	private void setTableCellsWithoutValue(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker broker, int brokerFirstCell) {
+	private void setTableCellsWithoutValue(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, RateShopReportBroker broker, int brokerFirstCell) {
 
 		final int lastRow = config.getGridValuesFirstCell().getRow() + config.getGroupsList().size();
 		
@@ -460,7 +461,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	 * @param broker The broker that has the suppliers
 	 * @param brokerFirstCell The index of the designated broker
 	 */
-	private void fillSuppliersHeader(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker broker, int brokerFirstCell) {
+	private void fillSuppliersHeader(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, RateShopReportBroker broker, int brokerFirstCell) {
 
 		Row poundRow = sheet.getRow(config.getGridValuesFirstCell().getRow()-1);
 		Row euroRow = sheet.getRow(config.getGridValuesFirstCell().getRow()-1 + config.getConversionTableOffset());
@@ -504,7 +505,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	 * @param broker The broker which table will be read
 	 * @param brokerFirstCell The initial column to start read
 	 */
-	private void setBrokerHeader(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, Broker broker, int brokerFirstCell){
+	private void setBrokerHeader(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, RateShopReportBroker broker, int brokerFirstCell){
 		
 		Row poundRow = sheet.getRow(config.getGridValuesFirstCell().getRow()-2);
 		Row euroRow = sheet.getRow(config.getGridValuesFirstCell().getRow()-2 + config.getConversionTableOffset());

@@ -24,6 +24,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import challenge_it.racbit.model.core.exceptions.ReportGenerationException;
+import challenge_it.racbit.model.reports.generators.utils.CrossReference;
 
 /**
  * Class that reads the XML file into an instance of Configuration

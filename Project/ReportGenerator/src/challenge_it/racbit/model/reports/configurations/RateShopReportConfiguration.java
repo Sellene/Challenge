@@ -5,6 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import challenge_it.racbit.model.reports.generators.utils.CrossReference;
+import challenge_it.racbit.model.reports.generators.utils.RateShopReportBroker;
+
 /**
  * 
  * Represents the content of the XML file, with the configuration to generate a Rate Shop Report file.
@@ -47,7 +50,7 @@ public class RateShopReportConfiguration extends Configuration{
 	/**
 	 * Contains all of the brokers
 	 */
-	private Map<String, Broker> _brokers;
+	private Map<String, RateShopReportBroker> _brokers;
 	
 	/**
 	 * The list of the brokers' names
@@ -67,7 +70,7 @@ public class RateShopReportConfiguration extends Configuration{
 	public RateShopReportConfiguration(){
 		_groupsList = new LinkedList<String>();
 		_groupsMap = new HashMap<String, CrossReference>();
-		_brokers = new HashMap<String, Broker>();
+		_brokers = new HashMap<String, RateShopReportBroker>();
 		_brokersList = new LinkedList<String>();
 	}
 
@@ -132,7 +135,7 @@ public class RateShopReportConfiguration extends Configuration{
 	 * @param name broker's name
 	 * @param b broker to add
 	 */
-	public void addBroker(String name, Broker b){
+	public void addBroker(String name, RateShopReportBroker b){
 		_brokersList.add(name);
 		_brokers.put(name, b);
 	}
@@ -142,7 +145,7 @@ public class RateShopReportConfiguration extends Configuration{
 	 * 
 	 * @return the map of brokers
 	 */
-	public Map<String, Broker> getBrokers(){
+	public Map<String, RateShopReportBroker> getBrokers(){
 		return _brokers;
 	}
 	

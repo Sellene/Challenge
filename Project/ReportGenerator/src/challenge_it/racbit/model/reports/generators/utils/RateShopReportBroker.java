@@ -1,4 +1,4 @@
-package challenge_it.racbit.model.reports.configurations;
+package challenge_it.racbit.model.reports.generators.utils;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -13,7 +13,7 @@ import challenge_it.racbit.model.core.Product;
  *  @author Cátia Moreira e João Taborda
  *
  */
-public class Broker {
+public class RateShopReportBroker {
 
 	
 	/**
@@ -53,7 +53,7 @@ public class Broker {
 	 * @param mininum If has a minimum column
 	 * @param columnName The name of the minimum column
 	 */
-	public Broker(String name, boolean mininum, String columnName){
+	public RateShopReportBroker(String name, boolean mininum, String columnName){
 		_name = name;
 		_hasMinimum = mininum;
 		_minColumnName = columnName;

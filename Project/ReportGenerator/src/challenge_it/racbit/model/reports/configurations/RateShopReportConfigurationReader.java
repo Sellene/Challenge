@@ -5,6 +5,9 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import challenge_it.racbit.model.reports.generators.utils.CrossReference;
+import challenge_it.racbit.model.reports.generators.utils.RateShopReportBroker;
+
 public class RateShopReportConfigurationReader extends ConfigurationReader{
 
 	/**
@@ -18,8 +21,6 @@ public class RateShopReportConfigurationReader extends ConfigurationReader{
 		final int FIRST_IDX = 0;
 		
 		RateShopReportConfiguration configuration = new RateShopReportConfiguration();
-		
-		configuration.setTemplateFilename(doc.getElementsByTagName("Template").item(FIRST_IDX).getFirstChild().getTextContent());
 		
 		configuration.setSheetNumber(Integer.parseInt( doc.getElementsByTagName("Sheet").item(FIRST_IDX).getFirstChild().getTextContent()));
 
@@ -44,7 +45,7 @@ public class RateShopReportConfigurationReader extends ConfigurationReader{
 			if(hasMinimum)
 				columnName =attr.getNamedItem("minimumName").getTextContent();
 				
-			Broker broker = new Broker(name, hasMinimum, columnName);
+			RateShopReportBroker broker = new RateShopReportBroker(name, hasMinimum, columnName);
 			
 			NodeList suppliers = brokerNode.getFirstChild().getChildNodes();
 			

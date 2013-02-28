@@ -1,5 +1,7 @@
 package challenge_it.racbit.model.reports.configurations;
 
+import challenge_it.racbit.model.reports.generators.utils.CrossReference;
+
 /**
  * 
  * Represents the content of the XML file, with the configuration to generate a XLSX file.

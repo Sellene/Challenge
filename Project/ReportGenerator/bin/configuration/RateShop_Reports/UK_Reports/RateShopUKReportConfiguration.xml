@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<TemplateConfiguration>
-    <Template>
-        <Filename>Template_UK_Report.xlsx</Filename>
-    </Template>
+<Configuration>
     <Sheet>
         <Number>0</Number>
     </Sheet>
@@ -87,4 +84,4 @@
             </Group>
         </Groups>
     </Generate>
-</TemplateConfiguration>
+</Configuration>

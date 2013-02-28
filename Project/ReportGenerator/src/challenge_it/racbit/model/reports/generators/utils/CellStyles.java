@@ -1,4 +1,4 @@
-package challenge_it.racbit.model.reports.generators;
+package challenge_it.racbit.model.reports.generators.utils;
 
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
