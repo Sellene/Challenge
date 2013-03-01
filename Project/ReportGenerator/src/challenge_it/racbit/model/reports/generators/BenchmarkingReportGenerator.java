@@ -23,7 +23,6 @@ import challenge_it.racbit.model.core.Product;
 import challenge_it.racbit.model.core.Product.SupplierType;
 import challenge_it.racbit.model.core.exceptions.CurrencyConversionException;
 import challenge_it.racbit.model.core.exceptions.ReportGenerationException;
-import challenge_it.racbit.model.reports.configurations.BenchmarkingReportConfiguration;
 import challenge_it.racbit.model.reports.generators.utils.BenchmarkingReportInfo;
 import challenge_it.racbit.model.reports.generators.utils.BenchmarkingReportInfo.BenchmarkingDay;
 import challenge_it.racbit.model.reports.generators.utils.BenchmarkingReportInfo.BenchmarkingGroup;
@@ -153,10 +152,10 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 
 
 	private void saveProduct(BenchmarkingReportInfo info, BenchmarkingLocation location, Product product) {
-		BenchmarkingGroup group = location.checkGroup(product.getGroup().name());
+		BenchmarkingGroup group = location.checkGroup(product.getGroup());
 		if(group == null){
-			group = info.new BenchmarkingGroup(product.getGroup().name());
-			location.addGroup(product.getGroup().name(), group);
+			group = info.new BenchmarkingGroup(product.getGroup());
+			location.addGroup(product.getGroup(), group);
 		}
 		
 		BenchmarkingDay day = group.checkDay(product.getNumberOfDays());

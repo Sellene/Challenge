@@ -2,8 +2,10 @@ package challenge_it.racbit.model.reports.generators.utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import challenge_it.racbit.model.core.Product;
+import challenge_it.racbit.model.core.Product.Group;
 
 public class BenchmarkingReportInfo{
 	
@@ -11,28 +13,28 @@ public class BenchmarkingReportInfo{
 
 		private String _name;
 		
-		private Map<String, BenchmarkingGroup> _groups;
+		private Map<Group, BenchmarkingGroup> _groups;
 		
 		
 		public BenchmarkingLocation (String name){
 			_name = name;
-			_groups = new HashMap<String, BenchmarkingGroup>();
+			_groups = new TreeMap<Group, BenchmarkingGroup>();
 		}
 		
 		public String getLocationName(){
 			return _name;
 		}
 		
-		public Map<String, BenchmarkingGroup> getGroups(){
+		public Map<Group, BenchmarkingGroup> getGroups(){
 			return _groups;
 		}
 		
-		public void addGroup(String name, BenchmarkingGroup group){
+		public void addGroup(Group name, BenchmarkingGroup group){
 			_groups.put(name, group);
 		}
 		
-		public BenchmarkingGroup checkGroup(String name){
-			return _groups.get(name);
+		public BenchmarkingGroup checkGroup(Group group){
+			return _groups.get(group);
 		}
 	}
 	
@@ -62,12 +64,12 @@ public class BenchmarkingReportInfo{
 
 	public class BenchmarkingGroup {
 
-		private String _name;
+		private Group _group;
 		
 		private Map<Integer, BenchmarkingDay> _days;
 		
-		public BenchmarkingGroup(String name) {
-			_name = name;
+		public BenchmarkingGroup(Group group) {
+			_group = group;
 			_days = new HashMap<Integer, BenchmarkingDay>();
 		}
 
@@ -84,7 +86,7 @@ public class BenchmarkingReportInfo{
 		}
 		
 		public String getGroupName(){
-			return _name;
+			return _group.name();
 		}
 	}
 	
