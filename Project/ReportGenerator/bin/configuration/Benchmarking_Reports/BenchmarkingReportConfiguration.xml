@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateConfiguration>
+    <ConversionRate>
+        <Column>P</Column>
+        <Row>2</Row> 
+    </ConversionRate>
+    <ConsultationDate>
+        <Column>E</Column>
+        <Row>2</Row> 
+    </ConsultationDate>
+    <Hour>
+        <Column>E</Column>
+        <Row>3</Row> 
+    </Hour>
+    <PickUpDate>
+        <Column>E</Column>
+        <Row>4</Row> 
+    </PickUpDate>
+   
+    <Generate>
+        <Begin>
+            <Column>F</Column>
+            <Row>7</Row>
+        </Begin>
+        <Location>
+            <Column>B</Column>
+            <Row>6</Row> 
+        </Location>
+        <Group>
+            <Column>C</Column>
+            <Row>6</Row> 
+        </Group>
+        <NumberOfDays>
+            <Column>D</Column>
+            <Row>6</Row> 
+        </NumberOfDays>
+    </Generate>
+</TemplateConfiguration>

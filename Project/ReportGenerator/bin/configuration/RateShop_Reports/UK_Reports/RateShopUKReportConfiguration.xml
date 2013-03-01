@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
-    <Sheet>
-        <Number>0</Number>
-    </Sheet>
     <Destination>
         <Column>A</Column>
         <Row>1</Row> 

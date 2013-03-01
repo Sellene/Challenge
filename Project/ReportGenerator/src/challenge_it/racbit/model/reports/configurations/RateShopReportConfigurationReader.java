@@ -22,8 +22,6 @@ public class RateShopReportConfigurationReader extends ConfigurationReader{
 		
 		RateShopReportConfiguration configuration = new RateShopReportConfiguration();
 		
-		configuration.setSheetNumber(Integer.parseInt( doc.getElementsByTagName("Sheet").item(FIRST_IDX).getFirstChild().getTextContent()));
-
 		configuration.setDestinationCell(getCell(doc.getElementsByTagName("Destination").item(FIRST_IDX)));
 		
 		configuration.setMonthCell(getCell(doc.getElementsByTagName("Month").item(FIRST_IDX)));

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="TemplateConfiguration">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="ConversionRate" type="ExcelType"/>
+                <xs:element name="ConsultationDate" type="ExcelType"/>
+                <xs:element name="Hour" type="ExcelType"/>
+                <xs:element name="PickUpDate" type="ExcelType"/>
+                <xs:element name="Generate">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="Begin" type="ExcelType"/>
+                            <xs:element name="Location" type="ExcelType"/>
+                            <xs:element name="Group" type="ExcelType"/>
+                            <xs:element name="NumberOfDays" type="ExcelType"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:complexType name="ExcelType">
+        <xs:sequence>
+            <xs:element name="Column" type="ColumnType"/>
+            <xs:element name="Row" type="RowType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="ExcelType_Column">
+        <xs:sequence>
+            <xs:element name="Column" type="ColumnType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:simpleType name="ColumnType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([A-Z])+"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="RowType">
+        <xs:restriction base="xs:int">
+            <xs:minInclusive value="0"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

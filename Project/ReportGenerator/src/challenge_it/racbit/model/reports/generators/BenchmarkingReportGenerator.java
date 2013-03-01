@@ -23,6 +23,8 @@ import challenge_it.racbit.model.core.Product;
 import challenge_it.racbit.model.core.Product.SupplierType;
 import challenge_it.racbit.model.core.exceptions.CurrencyConversionException;
 import challenge_it.racbit.model.core.exceptions.ReportGenerationException;
+import challenge_it.racbit.model.reports.configurations.BenchmarkingReportConfiguration;
+import challenge_it.racbit.model.reports.configurations.BenchmarkingReportConfigurationReader;
 import challenge_it.racbit.model.reports.generators.utils.BenchmarkingReportInfo;
 import challenge_it.racbit.model.reports.generators.utils.BenchmarkingReportInfo.BenchmarkingDay;
 import challenge_it.racbit.model.reports.generators.utils.BenchmarkingReportInfo.BenchmarkingGroup;
@@ -31,10 +33,21 @@ import challenge_it.racbit.model.reports.generators.utils.CrossReference;
 
 
 public class BenchmarkingReportGenerator implements IReportGenerator {
-	private final CrossReference FIRST_CELL = new CrossReference(6, 5);
-	private final CrossReference LOCATION = new CrossReference(6, 1);
-	private final CrossReference GROUPS = new CrossReference(6, 2);
-	private final CrossReference DAYS = new CrossReference(6, 3);
+	/**
+	 * Path to the xml configuration file
+	 */
+	private static final String XML_CONFIGURATION = "configuration/Benchmarking_Reports/BenchmarkingReportConfiguration.xml";
+	
+	/**
+	 * Path to the xml schema file
+	 */
+	private static final String XML_SCHEMA = "configuration/Benchmarking_Reports/BenchmarkingReportSchema.xsd";
+	
+	/**
+	 * Path to the xml transformation file
+	 */
+	private static final String XML_TRANSFORMATION = "configuration/ReportTransformation.xsl";
+	
 	
 	@Override
 	public void generate(Calendar reportDate, Country country, Iterable<Product> results) throws ReportGenerationException,
@@ -42,17 +55,17 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 		
 		HashMap<String, CrossReference> brokers = new HashMap<String, CrossReference>();
 		
-		//BenchmarkingReportConfiguration config = (BenchmarkingReportConfiguration) new BenchmarkingReportConfigurationReader().read(XML_CONFIGURATION, XML_SCHEMA, XML_TRANSFORMATION);
+		BenchmarkingReportConfiguration config = (BenchmarkingReportConfiguration) new BenchmarkingReportConfigurationReader().read(XML_CONFIGURATION, XML_SCHEMA, XML_TRANSFORMATION);
 		
-		BenchmarkingReportInfo info = processInformation(results, brokers);
+		BenchmarkingReportInfo info = processInformation(config, results, brokers);
 		
 		Workbook workbook = new XSSFWorkbook();
 		Sheet sheet = workbook.createSheet();
 		int offset = -1;
 		
-		offset = fill(workbook, sheet, brokers, info.getRegulars(), HSSFColor.LIME.index, offset);
+		offset = fill(workbook, sheet, config, brokers, info.getRegulars(), HSSFColor.LIME.index, offset);
 		
-		fill(workbook, sheet, brokers, info.getLowCosts(), HSSFColor.PINK.index, offset+1);
+		fill(workbook, sheet, config, brokers, info.getLowCosts(), HSSFColor.PINK.index, offset+1);
 		
 		FileOutputStream out;
 		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy HH_mm");
@@ -76,25 +89,25 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 		
 	}
 
-	private int fill(Workbook workbook, Sheet sheet, HashMap<String, CrossReference> brokers, Map<String, BenchmarkingLocation> locations, int color, int offset) {
+	private int fill(Workbook workbook, Sheet sheet, BenchmarkingReportConfiguration config, HashMap<String, CrossReference> brokers, Map<String, BenchmarkingLocation> locations, int color, int offset) {
 				
 		for (BenchmarkingLocation location : locations.values()) {
 			for(BenchmarkingGroup group : location.getGroups().values()){
 				for(BenchmarkingDay day : group.getDays().values()){
 					offset++;
 					
-					Row row = sheet.getRow(FIRST_CELL.getRow() + offset);
+					Row row = sheet.getRow(config.getGridValuesFirstCell().getRow() + offset);
 					
 					if(row == null)
-						row = sheet.createRow(FIRST_CELL.getRow() + offset);
+						row = sheet.createRow(config.getGridValuesFirstCell().getRow() + offset);
 					
-					Cell dayCell = row.createCell(DAYS.getColumn());
+					Cell dayCell = row.createCell(config.getNumberOfDaysCell().getColumn());
 					dayCell.setCellValue(day.getNumberOfDays());
 					
-					Cell groupCell = row.createCell(GROUPS.getColumn());
+					Cell groupCell = row.createCell(config.getGroupCell().getColumn());
 					groupCell.setCellValue(group.getGroupName());
 					
-					Cell locationCell = row.createCell(LOCATION.getColumn());
+					Cell locationCell = row.createCell(config.getLocationCell().getColumn());
 					locationCell.setCellValue(location.getLocationName());
 					
 					for (Product product : day.getProducts().values()) {
@@ -114,9 +127,9 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 		return offset;
 	}
 
-	private BenchmarkingReportInfo processInformation(Iterable<Product> results, HashMap<String, CrossReference> brokers) {
+	private BenchmarkingReportInfo processInformation(BenchmarkingReportConfiguration config, Iterable<Product> results, HashMap<String, CrossReference> brokers) {
 		BenchmarkingReportInfo info = new BenchmarkingReportInfo();
-		int column = 5;
+		int column = config.getGridValuesFirstCell().getColumn();
 		
 		for (Product product : results) {
 			BenchmarkingLocation location;

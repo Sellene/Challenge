@@ -10,39 +10,11 @@ import challenge_it.racbit.model.reports.generators.utils.CrossReference;
  *
  */
 public abstract class Configuration{
-	
-	/**
-	 * Defines the index number of a sheet in XLSX file
-	 */
-	private int _sheetNumber;
 
 	/**
 	 * Defines the row and column for the conversion rate
 	 */
 	private CrossReference _rateCell;	
-	
-	/**
-	 * Defines the filename of the template file
-	 */
-	private String _templateFilename;
-	
-	/**
-	 * Gets the index number of a sheet in XLSX file
-	 * 
-	 * @return The index number
-	 */
-	public int getSheetNumber(){
-		return _sheetNumber;
-	}
-	
-	/**
-	 * Sets the index number of a sheet in XLSX file
-	 * 
-	 * @param num The index number
-	 */
-	public void setSheetNumber(int num){
-		_sheetNumber = num;
-	}
 	
 	
 	/**
@@ -61,23 +33,5 @@ public abstract class Configuration{
 	 */
 	public void setRateCell(CrossReference c){
 		_rateCell = c;
-	}
-	
-	/**
-	 * Gets the filename of the XLSX template file
-	 * 
-	 * @return The filename
-	 */
-	public String getTemplateFilename(){
-		return _templateFilename;
-	}
-	
-	/**
-	 * Sets the filename of the XLSX template file
-	 * 
-	 * @param filename The name of the template file
-	 */
-	public void setTemplateFilename(String filename){
-		_templateFilename = filename;
 	}
 }
