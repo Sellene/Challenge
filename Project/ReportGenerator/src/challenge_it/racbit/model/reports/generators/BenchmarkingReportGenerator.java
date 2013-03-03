@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -32,6 +33,7 @@ import challenge_it.racbit.model.reports.generators.utils.BenchmarkingReportInfo
 import challenge_it.racbit.model.reports.generators.utils.BenchmarkingReportInfo.BenchmarkingLocation;
 import challenge_it.racbit.model.reports.generators.utils.CellStyles;
 import challenge_it.racbit.model.reports.generators.utils.CrossReference;
+import challenge_it.racbit.model.reports.generators.utils.IPredicate;
 
 
 public class BenchmarkingReportGenerator implements IReportGenerator {
@@ -54,7 +56,7 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 	public void generate(Calendar reportDate, Country country, Iterable<Product> results) throws ReportGenerationException,
 			CurrencyConversionException {
 		
-HashMap<String, CrossReference> brokers = new HashMap<String, CrossReference>();
+		HashMap<String, CrossReference> brokers = new HashMap<String, CrossReference>();
 		
 		BenchmarkingReportConfiguration config = (BenchmarkingReportConfiguration) new BenchmarkingReportConfigurationReader().read(XML_CONFIGURATION, XML_SCHEMA, XML_TRANSFORMATION);
 		
@@ -67,6 +69,8 @@ HashMap<String, CrossReference> brokers = new HashMap<String, CrossReference>();
 		offset = fill(workbook, sheet, config, brokers, info.getRegulars(), HSSFColor.LIME.index, offset);
 		
 		fill(workbook, sheet, config, brokers, info.getLowCosts(), HSSFColor.PINK.index, offset+1);
+		
+		
 		
 		FileOutputStream out;
 		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy HH_mm");
@@ -85,9 +89,6 @@ HashMap<String, CrossReference> brokers = new HashMap<String, CrossReference>();
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
-		
-		
 	}
 
 	private int fill(Workbook workbook, Sheet sheet, BenchmarkingReportConfiguration config, HashMap<String, CrossReference> brokers, Map<String, BenchmarkingLocation> locations, short color, int offset) {
@@ -105,7 +106,7 @@ HashMap<String, CrossReference> brokers = new HashMap<String, CrossReference>();
 					if(row == null)
 						row = sheet.createRow(config.getGridValuesFirstCell().getRow() + offset);
 					
-					Cell dayCell = row.createCell(config.getLocationCell().getColumn());
+					Cell dayCell = row.createCell(config.getNumberOfDaysCell().getColumn());
 					dayCell.setCellValue(day.getNumberOfDays());
 					dayCell.setCellStyle(CellStyles.setThinBorders(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.SMALL_TEXT, workbook)));
 					
@@ -116,6 +117,7 @@ HashMap<String, CrossReference> brokers = new HashMap<String, CrossReference>();
 					Cell locationCell = row.createCell(config.getLocationCell().getColumn());
 					locationCell.setCellValue(location.getLocationName());
 					locationCell.setCellStyle(CellStyles.setBackground(CellStyles.setColor(CellStyles.getDefaultCellStyle(workbook), HSSFColor.WHITE.index, CellStyles.MEDIUM_TEXT, workbook), color));
+					sheet.autoSizeColumn(config.getLocationCell().getColumn(), true);
 					
 					for (Product product : day.getProducts().values()) {
 						CrossReference crossReference = brokers.get(product.getBroker());
@@ -134,18 +136,84 @@ HashMap<String, CrossReference> brokers = new HashMap<String, CrossReference>();
 				}				
 			}
 			offset++;	
-			//row.createCell(offset);
+			
+			//These CrossReference objects are used to indicate the corners of the table
+			CrossReference locationCellNameIdxFirst = new CrossReference((config.getLocationCell().getRow()+1) + groupOffset, config.getLocationCell().getColumn());
+			CrossReference lastCellValueIdxLast = new CrossReference((config.getLocationCell().getRow()+1) + (offset-groupOffset-1) + groupOffset, (brokers.size()*2)+4); //TO CHANGE
+			
+			setTableBorders(workbook, sheet, locationCellNameIdxFirst, lastCellValueIdxLast);
 			
 			sheet.addMergedRegion(new CellRangeAddress(
-					config.getLocationCell().getRow() + groupOffset, //first row (0-based)
-					config.getLocationCell().getRow() + (offset-groupOffset-1) + groupOffset, //last row  (0-based)
-					config.getLocationCell().getColumn(), //first column (0-based)
+					locationCellNameIdxFirst.getRow(), //first row (0-based)
+					lastCellValueIdxLast.getRow(), //last row  (0-based)
+					locationCellNameIdxFirst.getColumn(), //first column (0-based)
 					config.getLocationCell().getColumn()  //last column  (0-based)
 				));
 
-			groupOffset = offset+1; //update group offset
+			groupOffset = offset+1; //update group offset	
 		}
 		return offset;
+	}
+
+	private void setTableBorders(Workbook workbook, Sheet sheet, CrossReference locationCellNameIdxFirst,
+			CrossReference lastCellValueIdxLast) {
+
+		int firstRow = locationCellNameIdxFirst.getRow();
+		int lastRow = lastCellValueIdxLast.getRow();
+		
+		int firstColumn = locationCellNameIdxFirst.getColumn();
+		int lastColumn = lastCellValueIdxLast.getColumn();
+		
+		for(int i = firstColumn-1; i <= lastColumn; i++){
+			
+			applyStylesToCells(workbook, sheet, firstRow, i, new IPredicate() {
+				
+				@Override
+				public void execute(Cell cell) {
+					cell.setCellStyle(CellStyles.setMediumTopBorder(cell.getCellStyle()));
+				}
+			});
+			
+			applyStylesToCells(workbook, sheet, lastRow, i, new IPredicate() {
+				
+				@Override
+				public void execute(Cell cell) {
+					cell.setCellStyle(CellStyles.setMediumBottomBorder(cell.getCellStyle()));
+				}
+			});
+		}
+		
+		for(int i = firstRow; i <= lastRow; i++){
+			applyStylesToCells(workbook, sheet, i, firstColumn, new IPredicate() {
+				
+				@Override
+				public void execute(Cell cell) {
+					cell.setCellStyle(CellStyles.setMediumLeftBorder(cell.getCellStyle()));
+				}
+			});
+			
+			applyStylesToCells(workbook, sheet, i, lastColumn, new IPredicate() {
+				
+				@Override
+				public void execute(Cell cell) {
+					cell.setCellStyle(CellStyles.setMediumRightBorder(cell.getCellStyle()));
+				}
+			});
+		}
+		
+	}
+
+	private void applyStylesToCells(Workbook workbook, Sheet sheet, int row, int column,
+			IPredicate predicate) {
+		
+		Cell toPaint = sheet.getRow(row).getCell(column);
+		
+		if(toPaint == null){
+			toPaint = sheet.getRow(row).createCell(column);
+			toPaint.setCellStyle(CellStyles.getDefaultCellStyle(workbook));
+		}
+		
+		predicate.execute(toPaint);
 	}
 
 	private BenchmarkingReportInfo processInformation(BenchmarkingReportConfiguration config, Iterable<Product> results, HashMap<String, CrossReference> brokers) {

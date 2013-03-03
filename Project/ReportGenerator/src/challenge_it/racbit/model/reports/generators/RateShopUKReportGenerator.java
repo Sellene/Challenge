@@ -516,8 +516,6 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		if(euroRow == null)
 			euroRow = sheet.createRow(config.getGridValuesFirstCell().getRow()-2 + config.getConversionTableOffset());
 
-		
-		
 		int lastColumn = brokerFirstCell + broker.getSuppliersList().size() + (broker.hasMinimum()?0:-1);
 		
 		for(int i = brokerFirstCell; i <= lastColumn;i++){
@@ -599,12 +597,10 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 	 * @throws CurrencyConversionException
 	 */
 	private void setFixedValues(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, RateShopUKReportInfo reportInfo) throws CurrencyConversionException {
-		
 		setDestination(workbook, sheet, config, reportInfo);
 		setCurrency(workbook, sheet, config);
 		setMonthAndDate(workbook, sheet, config, reportInfo);
 		setRate(workbook, sheet, config);
-		
 	}
 
 	/**
@@ -758,7 +754,6 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		
 		sheet.autoSizeColumn(config.getMonthCell().getColumn(), true);
 		sheet.autoSizeColumn(config.getDayCell().getColumn(), true);
-		
 	}
 
 	
@@ -796,192 +791,6 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		excRate.setCellStyle(CellStyles.setBackground(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.SMALL_TEXT, workbook), IndexedColors.LIME.index));	
 	}
 	
-	
-//	/**
-//	 * Set the fixed values in the report (Destination, Month, Days, Broker and Conversion Rate)
-//	 * 
-//	 * @param brokerName The broker
-//	 * @param destination The destination
-//	 * @param puDate The initial date
-//	 * @param doDate The end date
-//	 * @throws IllegalArgumentException When the conversion rate isn't valid
-//	 * @throws IOException When can't access to the service that provides the conversion rate
-//	 * @throws ConversionException When the ExchangeRateService gives a error 
-//	 */
-//	private void setFixedValues(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, RateShopUKReportInfo reportInfo) throws CurrencyConversionException {
-//		
-//		setDestination(workbook, sheet, config, reportInfo);
-//		setCurrency(workbook, sheet, config);
-//		setMonthAndDate(workbook, sheet, config, reportInfo);
-//		setRate(workbook, sheet, config);
-//		
-//	}
-//
-//	private void setRate(Workbook workbook, Sheet sheet, RateShopReportConfiguration config) throws CurrencyConversionException {
-//		
-//		double exchangeRate = ExchangeRateService.getExchangeRate("EUR", "GBP", 4);
-//		
-//		if(exchangeRate == 0)
-//			throw new IllegalArgumentException();
-//		
-//		Row rate = sheet.getRow(config.getRateCell().getRow());
-//		
-//		if(rate == null)
-//			rate = sheet.createRow(config.getRateCell().getRow());
-//		
-//		CellStyle style = CellStyles.setBackground(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.SMALL_TEXT, workbook), IndexedColors.LIME.index);
-//		
-//		Cell excRate = rate.createCell(config.getRateCell().getColumn());
-//		excRate.setCellValue(exchangeRate);
-//		excRate.setCellType(Cell.CELL_TYPE_NUMERIC);
-//		excRate.setCellStyle(style);
-//		
-//		excRate = rate.createCell(config.getRateCell().getColumn() + 1);
-//		excRate.setCellValue(exchangeRate);
-//		excRate.setCellType(Cell.CELL_TYPE_NUMERIC);
-//		excRate.setCellStyle(style);
-//
-//		sheet.addMergedRegion(new CellRangeAddress(
-//				rate.getRowNum(), //first row (0-based)
-//				rate.getRowNum(), //last row  (0-based)
-//				config.getRateCell().getColumn(), //first column (0-based)
-//				config.getRateCell().getColumn() + 1  //last column  (0-based)
-//	    ));
-//		
-//	}
-//
-//	private void setMonthAndDate(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, RateShopUKReportInfo reportInfo) {
-//		Locale l = new Locale("pt", "PT");
-//		
-//		for (int i = config.getMonthCell().getRow(); i <= 1 + config.getMonthCell().getRow() + config.getGroupsList().size(); i++) {
-//			Row poundRow = sheet.getRow(i);
-//			Row euroRow = sheet.getRow(i + config.getConversionTableOffset());
-//			
-//			if(poundRow == null)
-//				poundRow = sheet.createRow(i);
-//			
-//			if(euroRow == null)
-//				euroRow = sheet.createRow(i + config.getConversionTableOffset());
-//			
-//			
-//			CellStyle monthStyle = CellStyles.setRotation(CellStyles.setBoldAndColor(CellStyles.setMediumBorders(CellStyles.getDefaultCellStyle(workbook)), HSSFColor.RED.index, CellStyles.MEDIUM_TEXT, workbook));
-//			CellStyle dayStyle = CellStyles.setRotation(CellStyles.setColor(CellStyles.setMediumBorders(CellStyles.getDefaultCellStyle(workbook)), HSSFColor.RED.index, CellStyles.MEDIUM_TEXT, workbook));
-//			
-//			Cell poundMonthCell = poundRow.createCell(config.getMonthCell().getColumn());
-//			poundMonthCell.setCellValue(reportInfo.getStartDate().getDisplayName(Calendar.MONTH, Calendar.LONG, l));
-//			poundMonthCell.setCellStyle(monthStyle);
-//			
-//			Cell euroMonthCell = euroRow.createCell(config.getMonthCell().getColumn());
-//			euroMonthCell.setCellValue(reportInfo.getStartDate().getDisplayName(Calendar.MONTH, Calendar.LONG, l));
-//			euroMonthCell.setCellStyle(monthStyle);
-//			
-//			Cell poundDayCell = poundRow.createCell(config.getDayCell().getColumn());
-//			poundDayCell.setCellValue(reportInfo.getStartDate().get(Calendar.DATE) + " a " + reportInfo.getEndDate().get(Calendar.DATE));
-//			poundDayCell.setCellStyle(dayStyle);
-//			
-//			Cell euroDayCell = euroRow.createCell(config.getDayCell().getColumn());
-//			euroDayCell.setCellValue(reportInfo.getStartDate().get(Calendar.DATE) + " a " + reportInfo.getEndDate().get(Calendar.DATE));
-//			euroDayCell.setCellStyle(dayStyle);
-//		}
-//		
-//		
-//		sheet.addMergedRegion(new CellRangeAddress(
-//				config.getMonthCell().getRow(), //first row (0-based)
-//				config.getMonthCell().getRow() + 1 + config.getGroupsList().size(), //last row  (0-based)
-//				config.getMonthCell().getColumn(), //first column (0-based)
-//				config.getMonthCell().getColumn()  //last column  (0-based)
-//	    ));
-//		
-//		
-//		sheet.addMergedRegion(new CellRangeAddress(
-//				config.getDayCell().getRow(), //first row (0-based)
-//				config.getDayCell().getRow() + 1 + config.getGroupsList().size(), //last row  (0-based)
-//				config.getDayCell().getColumn(), //first column (0-based)
-//				config.getDayCell().getColumn()  //last column  (0-based)
-//	    ));
-//		
-//		sheet.addMergedRegion(new CellRangeAddress(
-//				config.getMonthCell().getRow() + config.getConversionTableOffset(), //first row (0-based)
-//				config.getMonthCell().getRow() + config.getConversionTableOffset() + 1 + config.getGroupsList().size(), //last row  (0-based)
-//				config.getMonthCell().getColumn(), //first column (0-based)
-//				config.getMonthCell().getColumn()  //last column  (0-based)
-//	    ));
-//		
-//		
-//		sheet.addMergedRegion(new CellRangeAddress(
-//				config.getDayCell().getRow() + config.getConversionTableOffset(), //first row (0-based)
-//				config.getDayCell().getRow() + config.getConversionTableOffset() + 1 + config.getGroupsList().size(), //last row  (0-based)
-//				config.getDayCell().getColumn(), //first column (0-based)
-//				config.getDayCell().getColumn()  //last column  (0-based)
-//	    ));
-//		
-//		sheet.autoSizeColumn(config.getMonthCell().getColumn(), true);
-//		sheet.autoSizeColumn(config.getDayCell().getColumn(), true);
-//		
-//	}
-//
-//	private void setCurrency(Workbook workbook, Sheet sheet, RateShopReportConfiguration config) {
-//		final int numberOfRowForCurrencySymbol = 2;
-//		
-//		for (int i = 0; i < numberOfRowForCurrencySymbol; i++) {
-//			Row currency = sheet.getRow((config.getDestinationCell().getRow() + 1) + i);
-//			
-//			if(currency == null)
-//				currency = sheet.createRow((config.getDestinationCell().getRow() + 1) + i);
-//			
-//			Cell cell = currency.createCell(config.getGridValuesFirstCell().getColumn()-1);
-//			cell.setCellValue("£");
-//			cell.setCellStyle(CellStyles.setBoldAndColor(CellStyles.setMediumBorders(CellStyles.getDefaultCellStyle(workbook)), HSSFColor.RED.index, CellStyles.MEDIUM_TEXT, workbook));
-//		}
-//		
-//		sheet.addMergedRegion(new CellRangeAddress(
-//				(config.getDestinationCell().getRow() + 1), //first row (0-based)
-//				(config.getDestinationCell().getRow() + 1) + 1, //last row  (0-based)
-//				config.getGridValuesFirstCell().getColumn()-1, //first column (0-based)
-//				config.getGridValuesFirstCell().getColumn()-1  //last column  (0-based)
-//	    ));
-//		
-//		for (int i = 0; i < numberOfRowForCurrencySymbol; i++) {
-//			Row currency = sheet.getRow((config.getDestinationCell().getRow() + 1) + config.getConversionTableOffset() + i);
-//			
-//			if(currency == null)
-//				currency = sheet.createRow((config.getDestinationCell().getRow() + 1) + config.getConversionTableOffset() + i);
-//			
-//			Cell cell = currency.createCell(config.getGridValuesFirstCell().getColumn()-1);
-//			cell.setCellValue("€");
-//			cell.setCellStyle(CellStyles.setBoldAndColor(CellStyles.setMediumBorders(CellStyles.getDefaultCellStyle(workbook)), HSSFColor.RED.index, CellStyles.MEDIUM_TEXT, workbook));
-//		}
-//		
-//		sheet.addMergedRegion(new CellRangeAddress(
-//				(config.getDestinationCell().getRow() + 1) +  config.getConversionTableOffset(), //first row (0-based)
-//				(config.getDestinationCell().getRow() + 1) + 1 + config.getConversionTableOffset(), //last row  (0-based)
-//				config.getGridValuesFirstCell().getColumn()-1, //first column (0-based)
-//				config.getGridValuesFirstCell().getColumn()-1  //last column  (0-based)
-//	    ));
-//		
-//	}
-//
-//	private void setDestination(Workbook workbook, Sheet sheet, RateShopReportConfiguration config, RateShopUKReportInfo reportInfo) {
-//		Row destination = sheet.getRow(config.getDestinationCell().getRow());
-//		
-//		if(destination == null)
-//			destination = sheet.createRow(config.getDestinationCell().getRow());
-//		
-//		for (int i = config.getDestinationCell().getColumn(); i <= config.getDestinationCell().getColumn()+2; i++) {
-//			Cell cell = destination.createCell(i);
-//			cell.setCellValue(reportInfo.getDestination());
-//			cell.setCellStyle(CellStyles.setBoldAndColor(CellStyles.getDefaultCellStyle(workbook), HSSFColor.RED.index, CellStyles.LARGE_TEXT, workbook));	
-//			
-//		}
-//		
-//		sheet.addMergedRegion(new CellRangeAddress(
-//				destination.getRowNum(), //first row (0-based)
-//				destination.getRowNum(), //last row  (0-based)
-//	            config.getDestinationCell().getColumn(), //first column (0-based)
-//	            config.getDestinationCell().getColumn()+2  //last column  (0-based)
-//	    ));		
-//	}
-//
 	/**
 	 * Saves a XLSX Report with a specific name
 	 * 
