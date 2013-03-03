@@ -1,6 +1,5 @@
 package challenge_it.racbit.model.reports.generators;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -11,7 +10,7 @@ import java.util.Map;
 
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -27,6 +26,7 @@ import challenge_it.racbit.model.core.exceptions.CurrencyConversionException;
 import challenge_it.racbit.model.core.exceptions.ReportGenerationException;
 import challenge_it.racbit.model.reports.configurations.BenchmarkingReportConfiguration;
 import challenge_it.racbit.model.reports.configurations.BenchmarkingReportConfigurationReader;
+import challenge_it.racbit.model.reports.exchangeRate.ExchangeRateService;
 import challenge_it.racbit.model.reports.generators.utils.BenchmarkingReportInfo;
 import challenge_it.racbit.model.reports.generators.utils.BenchmarkingReportInfo.BenchmarkingDay;
 import challenge_it.racbit.model.reports.generators.utils.BenchmarkingReportInfo.BenchmarkingGroup;
@@ -37,6 +37,8 @@ import challenge_it.racbit.model.reports.generators.utils.IPredicate;
 
 
 public class BenchmarkingReportGenerator implements IReportGenerator {
+	
+	private String TITLE = "BENCHMARKING TO";
 	/**
 	 * Path to the xml configuration file
 	 */
@@ -71,23 +73,12 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 		fill(workbook, sheet, config, brokers, info.getLowCosts(), HSSFColor.PINK.index, offset+1);
 		
 		
+		setFixedValues(workbook, sheet, config, reportDate);
 		
-		FileOutputStream out;
-		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy HH_mm");
-		
-		// TODO: Specify output file config.getLocationCell() 
-		// Do we net to put the country in the name?
 		try {
-			out = new FileOutputStream("Teste" + Calendar.getInstance().get(Calendar.MINUTE) + ".xlsx");
-			XSSFFormulaEvaluator.evaluateAllFormulaCells((XSSFWorkbook)workbook);
-			workbook.write(out);
-			out.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			saveFile(workbook, reportDate, country);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new ReportGenerationException(e);
 		}
 	}
 
@@ -108,15 +99,15 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 					
 					Cell dayCell = row.createCell(config.getNumberOfDaysCell().getColumn());
 					dayCell.setCellValue(day.getNumberOfDays());
-					dayCell.setCellStyle(CellStyles.setThinBorders(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.SMALL_TEXT, workbook)));
+					dayCell.setCellStyle(CellStyles.setThinBorders(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.TEXT_SIZE_SMALL, workbook)));
 					
 					Cell groupCell = row.createCell(config.getGroupCell().getColumn());
 					groupCell.setCellValue(group.getGroupName());
-					groupCell.setCellStyle(CellStyles.setThinBorders(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.SMALL_TEXT, workbook)));
+					groupCell.setCellStyle(CellStyles.setThinBorders(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.TEXT_SIZE_SMALL, workbook)));
 					
 					Cell locationCell = row.createCell(config.getLocationCell().getColumn());
 					locationCell.setCellValue(location.getLocationName());
-					locationCell.setCellStyle(CellStyles.setBackground(CellStyles.setColor(CellStyles.getDefaultCellStyle(workbook), HSSFColor.WHITE.index, CellStyles.MEDIUM_TEXT, workbook), color));
+					locationCell.setCellStyle(CellStyles.setBackground(CellStyles.setColor(CellStyles.getDefaultCellStyle(workbook), HSSFColor.WHITE.index, CellStyles.TEXT_SIZE_MEDIUM, workbook), color));
 					sheet.autoSizeColumn(config.getLocationCell().getColumn(), true);
 					
 					for (Product product : day.getProducts().values()) {
@@ -306,4 +297,156 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 		
 		day.addProduct(product);
 	}
+	
+	private void setFixedValues(Workbook workbook, Sheet sheet, BenchmarkingReportConfiguration config, Calendar reportDate) throws CurrencyConversionException {
+		setTitle(workbook, sheet, config);
+		setConsultationDate(workbook, sheet, config, reportDate);
+		setHour(workbook, sheet, config, reportDate);
+		setPickUpDate(workbook, sheet, config, reportDate);
+		setRate(workbook, sheet, config);
+	}
+	
+	private void setTitle(Workbook workbook, Sheet sheet, BenchmarkingReportConfiguration config) {
+		Row title = sheet.getRow(config.getTitleCell().getRow());
+		
+		if(title == null)
+			title = sheet.createRow(config.getTitleCell().getRow());
+		
+		
+		sheet.addMergedRegion(new CellRangeAddress(
+				title.getRowNum(), //first row (0-based)
+				title.getRowNum(), //last row  (0-based)
+	            config.getTitleCell().getColumn(), //first column (0-based)
+	            config.getTitleCell().getColumn()+3  //last column  (0-based)
+	    ));	
+		
+		Cell cell = title.createCell(config.getTitleCell().getColumn());
+		cell.setCellValue(TITLE);
+		cell.setCellStyle(CellStyles.setAligment(CellStyles.setBoldAndColor(CellStyles.getDefaultCellStyle(workbook), HSSFColor.RED.index, CellStyles.TEXT_SIZE_MEDIUM, workbook), CellStyles.ALIGN_LEFT));		
+		
+	}
+
+	private void setConsultationDate(Workbook workbook, Sheet sheet, BenchmarkingReportConfiguration config, Calendar reportDate) {
+		Row consultationDate = sheet.getRow(config.getConsultationDateCell().getRow());
+		
+		if(consultationDate == null)
+			consultationDate = sheet.createRow(config.getConsultationDateCell().getRow());
+		
+		
+		sheet.addMergedRegion(new CellRangeAddress(
+				consultationDate.getRowNum(), //first row (0-based)
+				consultationDate.getRowNum(), //last row  (0-based)
+	            config.getConsultationDateCell().getColumn(), //first column (0-based)
+	            config.getConsultationDateCell().getColumn()+3  //last column  (0-based)
+	    ));	
+		
+		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy");
+		
+		Cell cell = consultationDate.createCell(config.getConsultationDateCell().getColumn());
+		cell.setCellValue(String.format("DATA DE CONSULTA: %s", dateFormat.format(reportDate.getTime())));
+		cell.setCellStyle(CellStyles.setAligment(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.TEXT_SIZE_MEDIUM, workbook), CellStyles.ALIGN_LEFT));		
+		
+	}
+
+	private void setHour(Workbook workbook, Sheet sheet, BenchmarkingReportConfiguration config, Calendar reportDate) {
+		Row hour = sheet.getRow(config.getHourCell().getRow());
+		
+		if(hour == null)
+			hour = sheet.createRow(config.getHourCell().getRow());
+		
+		
+		sheet.addMergedRegion(new CellRangeAddress(
+				hour.getRowNum(), //first row (0-based)
+				hour.getRowNum(), //last row  (0-based)
+	            config.getHourCell().getColumn(), //first column (0-based)
+	            config.getHourCell().getColumn()+3  //last column  (0-based)
+	    ));	
+		
+		DateFormat dateFormat = new SimpleDateFormat("HH:mm");
+		
+		Cell cell = hour.createCell(config.getHourCell().getColumn());
+		cell.setCellValue(String.format("HORA: %s", dateFormat.format(reportDate.getTime())));
+		cell.setCellStyle(CellStyles.setAligment(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.TEXT_SIZE_MEDIUM, workbook), CellStyles.ALIGN_LEFT));		
+		
+	}
+
+	private void setPickUpDate(Workbook workbook, Sheet sheet, BenchmarkingReportConfiguration config, Calendar reportDate) {
+		Row pickUpDate = sheet.getRow(config.getPickUpDateCell().getRow());
+		
+		if(pickUpDate == null)
+			pickUpDate = sheet.createRow(config.getPickUpDateCell().getRow());
+		
+		
+		sheet.addMergedRegion(new CellRangeAddress(
+				pickUpDate.getRowNum(), //first row (0-based)
+				pickUpDate.getRowNum(), //last row  (0-based)
+	            config.getPickUpDateCell().getColumn(), //first column (0-based)
+	            config.getPickUpDateCell().getColumn()+3  //last column  (0-based)
+	    ));	
+		
+		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy");
+		
+		Cell cell = pickUpDate.createCell(config.getPickUpDateCell().getColumn());
+		cell.setCellValue(String.format("DATA DE PICK UP: %s", dateFormat.format(reportDate.getTime())));
+		cell.setCellStyle(CellStyles.setBackground(CellStyles.setAligment(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.TEXT_SIZE_MEDIUM, workbook), CellStyles.ALIGN_LEFT), HSSFColor.YELLOW.index));		
+		
+	}
+
+	/**
+	 * Set the current conversion rate
+	 * 
+	 * @param workbook The workbook for the Excel File
+	 * @param sheet The sheet that is used
+	 * @param config The RateShopReportConfiguration instance
+	 * @throws CurrencyConversionException
+	 */
+	private void setRate(Workbook workbook, Sheet sheet, BenchmarkingReportConfiguration config) throws CurrencyConversionException {
+		
+		double exchangeRate = ExchangeRateService.getExchangeRate("EUR", "GBP", 4);
+		
+		if(exchangeRate == 0)
+			throw new IllegalArgumentException();
+		
+		Row rate = sheet.getRow(config.getRateCell().getRow());
+		
+		if(rate == null)
+			rate = sheet.createRow(config.getRateCell().getRow());
+		
+		
+		sheet.addMergedRegion(new CellRangeAddress(
+				rate.getRowNum(), //first row (0-based)
+				rate.getRowNum(), //last row  (0-based)
+				config.getRateCell().getColumn(), //first column (0-based)
+				config.getRateCell().getColumn() + 1  //last column  (0-based)
+	    ));
+		
+		Cell excRate = rate.createCell(config.getRateCell().getColumn());
+		excRate.setCellValue(exchangeRate);
+		excRate.setCellType(Cell.CELL_TYPE_NUMERIC);
+		excRate.setCellStyle(CellStyles.setBackground(CellStyles.setBold(CellStyles.setDataFormat(workbook, CellStyles.getDefaultCellStyle(workbook), CellStyles.DECIMAL_POINT_FOUR), CellStyles.TEXT_SIZE_SMALL, workbook), IndexedColors.LIME.index));	
+	}
+	
+	/**
+	 * Saves a XLSX Report with a specific name
+	 * 
+	 * @param destination The destination
+	 * @param puDate The initial date
+	 * @param doDate The end date
+	 * @throws IOException When can't create the file
+	 */
+	private void saveFile(Workbook workbook, Calendar reportDate, Country country) throws IOException{
+		FileOutputStream out;
+		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy HH_mm");
+		
+		// TODO: Specify output file location 
+		// Do we net to put the country in the name?
+		out = new FileOutputStream(String.format("R %s Benchmarking_UK_PT.xlsx", dateFormat.format(reportDate.getTime())));
+	
+		XSSFFormulaEvaluator.evaluateAllFormulaCells((XSSFWorkbook)workbook);
+		workbook.write(out);
+		out.close();
+	}
+
+	
+
 }
