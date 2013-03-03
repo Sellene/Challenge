@@ -4,6 +4,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="ConversionRate" type="ExcelType"/>
+                <xs:element name="Title" type="ExcelType"/>
                 <xs:element name="ConsultationDate" type="ExcelType"/>
                 <xs:element name="Hour" type="ExcelType"/>
                 <xs:element name="PickUpDate" type="ExcelType"/>

@@ -626,7 +626,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		
 		Cell cell = destination.createCell(config.getDestinationCell().getColumn());
 		cell.setCellValue(reportInfo.getDestination());
-		cell.setCellStyle(CellStyles.setBoldAndColor(CellStyles.getDefaultCellStyle(workbook), HSSFColor.RED.index, CellStyles.LARGE_TEXT, workbook));		
+		cell.setCellStyle(CellStyles.setBoldAndColor(CellStyles.getDefaultCellStyle(workbook), HSSFColor.RED.index, CellStyles.TEXT_SIZE_LARGE, workbook));		
 		
 	}
 
@@ -649,7 +649,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 			
 			Cell cell = currency.createCell(config.getGridValuesFirstCell().getColumn()-1);
 			cell.setCellValue("£");
-			cell.setCellStyle(CellStyles.setBoldAndColor(CellStyles.setMediumBorders(CellStyles.getDefaultCellStyle(workbook)), HSSFColor.RED.index, CellStyles.MEDIUM_TEXT, workbook));
+			cell.setCellStyle(CellStyles.setBoldAndColor(CellStyles.setMediumBorders(CellStyles.getDefaultCellStyle(workbook)), HSSFColor.RED.index, CellStyles.TEXT_SIZE_MEDIUM, workbook));
 		}
 		
 		sheet.addMergedRegion(new CellRangeAddress(
@@ -667,7 +667,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 			
 			Cell cell = currency.createCell(config.getGridValuesFirstCell().getColumn()-1);
 			cell.setCellValue("€");
-			cell.setCellStyle(CellStyles.setBoldAndColor(CellStyles.setMediumBorders(CellStyles.getDefaultCellStyle(workbook)), HSSFColor.RED.index, CellStyles.MEDIUM_TEXT, workbook));
+			cell.setCellStyle(CellStyles.setBoldAndColor(CellStyles.setMediumBorders(CellStyles.getDefaultCellStyle(workbook)), HSSFColor.RED.index, CellStyles.TEXT_SIZE_MEDIUM, workbook));
 		}
 		
 		sheet.addMergedRegion(new CellRangeAddress(
@@ -701,8 +701,8 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 				euroRow = sheet.createRow(i + config.getConversionTableOffset());
 			
 			
-			CellStyle monthStyle = CellStyles.setRotation(CellStyles.setMediumBorders(CellStyles.setBoldAndColor(CellStyles.getDefaultCellStyle(workbook), HSSFColor.RED.index, CellStyles.MEDIUM_TEXT, workbook)));
-			CellStyle dayStyle = CellStyles.setRotation(CellStyles.setMediumBorders(CellStyles.setColor(CellStyles.getDefaultCellStyle(workbook), HSSFColor.RED.index, CellStyles.MEDIUM_TEXT, workbook)));
+			CellStyle monthStyle = CellStyles.setRotation(CellStyles.setMediumBorders(CellStyles.setBoldAndColor(CellStyles.getDefaultCellStyle(workbook), HSSFColor.RED.index, CellStyles.TEXT_SIZE_MEDIUM, workbook)));
+			CellStyle dayStyle = CellStyles.setRotation(CellStyles.setMediumBorders(CellStyles.setColor(CellStyles.getDefaultCellStyle(workbook), HSSFColor.RED.index, CellStyles.TEXT_SIZE_MEDIUM, workbook)));
 			
 			Cell poundMonthCell = poundRow.createCell(config.getMonthCell().getColumn());
 			poundMonthCell.setCellValue(reportInfo.getStartDate().getDisplayName(Calendar.MONTH, Calendar.LONG, l));
@@ -788,7 +788,7 @@ public class RateShopUKReportGenerator implements IReportGenerator {
 		Cell excRate = rate.createCell(config.getRateCell().getColumn());
 		excRate.setCellValue(exchangeRate);
 		excRate.setCellType(Cell.CELL_TYPE_NUMERIC);
-		excRate.setCellStyle(CellStyles.setBackground(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.SMALL_TEXT, workbook), IndexedColors.LIME.index));	
+		excRate.setCellStyle(CellStyles.setBackground(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.TEXT_SIZE_SMALL, workbook), IndexedColors.LIME.index));	
 	}
 	
 	/**
