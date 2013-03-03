@@ -97,7 +97,7 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 		int groupOffset = offset+1;
 		
 		for (BenchmarkingLocation location : locations.values()) {
-			for(BenchmarkingGroup group : location.getGroups().values()){
+			for(BenchmarkingGroup group : location.getGroups().values()){		
 				for(BenchmarkingDay day : group.getDays().values()){
 					offset++;
 					
@@ -133,7 +133,17 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 						productSupplier.setCellStyle(CellStyles.setBackground(CellStyles.setThinBorders(CellStyles.getDefaultCellStyle(workbook)), HSSFColor.LIGHT_GREEN.index));
 						
 					}
-				}				
+				}
+
+				if(group.getDays().size() > 1){
+					sheet.addMergedRegion(new CellRangeAddress(
+						row.getRowNum()-group.getDays().size()+1, //first row (0-based)
+						row.getRowNum(), //last row  (0-based)
+						config.getGroupCell().getColumn(), //first column (0-based)
+						config.getGroupCell().getColumn()  //last column  (0-based)
+					));
+				}
+				
 			}
 			offset++;	
 			
@@ -141,8 +151,7 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 			CrossReference locationCellNameIdxFirst = new CrossReference((config.getLocationCell().getRow()+1) + groupOffset, config.getLocationCell().getColumn());
 			CrossReference lastCellValueIdxLast = new CrossReference((config.getLocationCell().getRow()+1) + (offset-groupOffset-1) + groupOffset, (brokers.size()*2)+4); //TO CHANGE
 			
-			setTableBorders(workbook, sheet, locationCellNameIdxFirst, lastCellValueIdxLast);
-			
+			//merge location name cell
 			sheet.addMergedRegion(new CellRangeAddress(
 					locationCellNameIdxFirst.getRow(), //first row (0-based)
 					lastCellValueIdxLast.getRow(), //last row  (0-based)
@@ -151,8 +160,38 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 				));
 
 			groupOffset = offset+1; //update group offset	
+			
+			setTableBorders(workbook, sheet, locationCellNameIdxFirst, lastCellValueIdxLast);
+			
+			setCurrencyCell(workbook, sheet, locationCellNameIdxFirst, lastCellValueIdxLast, "£", HSSFColor.YELLOW.index);
+			
+			
+			//merge currency cell
+			sheet.addMergedRegion(new CellRangeAddress(
+					locationCellNameIdxFirst.getRow(), //first row (0-based)
+					lastCellValueIdxLast.getRow(), //last row  (0-based)
+					locationCellNameIdxFirst.getColumn(), //first column (0-based)
+					config.getLocationCell().getColumn()  //last column  (0-based)
+				));
+			
 		}
 		return offset;
+	}
+
+	private void setCurrencyCell(Workbook workbook, Sheet sheet,
+			CrossReference locationCellNameIdxFirst,
+			CrossReference lastCellValueIdxLast, String symbol, short color) {
+		
+		Cell currencySymbol = sheet.getRow(locationCellNameIdxFirst.getRow()).getCell(locationCellNameIdxFirst.getColumn()-1);
+		currencySymbol.setCellValue(symbol);
+		currencySymbol.setCellStyle(CellStyles.setBackground(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.MEDIUM_TEXT, workbook), color));
+				
+		sheet.addMergedRegion(new CellRangeAddress(
+				locationCellNameIdxFirst.getRow(), //first row (0-based)
+				lastCellValueIdxLast.getRow(), //last row  (0-based)
+				locationCellNameIdxFirst.getColumn()-1, //first column (0-based)
+				locationCellNameIdxFirst.getColumn()-1  //last column  (0-based)
+			));
 	}
 
 	private void setTableBorders(Workbook workbook, Sheet sheet, CrossReference locationCellNameIdxFirst,
