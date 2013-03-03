@@ -18,6 +18,8 @@ public class BenchmarkingReportConfigurationReader extends ConfigurationReader{
 		
 		configuration.setRateCell(getCell(doc.getElementsByTagName("ConversionRate").item(FIRST_IDX)));
 		
+		configuration.setTitleCell(getCell(doc.getElementsByTagName("Title").item(FIRST_IDX)));
+		
 		configuration.setConsultationDateCell(getCell(doc.getElementsByTagName("ConsultationDate").item(FIRST_IDX)));
 		
 		configuration.setHourCell(getCell(doc.getElementsByTagName("Hour").item(FIRST_IDX)));

@@ -12,6 +12,11 @@ import challenge_it.racbit.model.reports.generators.utils.CrossReference;
 public class BenchmarkingReportConfiguration extends Configuration{
 
 	/**
+	 * Defines the row and column for the title
+	 */
+	private CrossReference _titleCell;
+	
+	/**
 	 * Defines the row and column for the consultation date
 	 */
 	private CrossReference _consultationDateCell;
@@ -45,6 +50,24 @@ public class BenchmarkingReportConfiguration extends Configuration{
 	 * Defines the row and column for the number of days
 	 */
 	private CrossReference _numberOfDaysCell;
+	
+	/**
+	 * Gets the row and column for the consultation date
+	 * 
+	 * @return The row and column
+	 */
+	public CrossReference getTitleCell(){
+		return _titleCell;
+	}
+	
+	/**
+	 * Sets the row and column for the consultation date
+	 * 
+	 * @param c CrossReference with the row and column
+	 */
+	public void setTitleCell(CrossReference c){
+		_titleCell = c;
+	}
 	
 	
 	/**

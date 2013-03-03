@@ -175,7 +175,7 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 		
 		Cell currencySymbol = sheet.getRow(locationCellNameIdxFirst.getRow()).getCell(locationCellNameIdxFirst.getColumn()-1);
 		currencySymbol.setCellValue(symbol);
-		currencySymbol.setCellStyle(CellStyles.setBackground(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.MEDIUM_TEXT, workbook), color));
+		currencySymbol.setCellStyle(CellStyles.setBackground(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.TEXT_SIZE_MEDIUM, workbook), color));
 				
 		sheet.addMergedRegion(new CellRangeAddress(
 				locationCellNameIdxFirst.getRow(), //first row (0-based)

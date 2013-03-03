@@ -7,9 +7,16 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 public class CellStyles {
 
-	public static final short SMALL_TEXT = 8;
-	public static final short MEDIUM_TEXT = 10;
-	public static final short LARGE_TEXT = 12;
+	public static final short TEXT_SIZE_SMALL = 8;
+	public static final short TEXT_SIZE_MEDIUM = 10;
+	public static final short TEXT_SIZE_LARGE = 12;
+	
+	public static final short ALIGN_CENTER = CellStyle.ALIGN_CENTER;
+	public static final short ALIGN_LEFT = CellStyle.ALIGN_LEFT;
+	public static final short ALIGN_RIGHT = CellStyle.ALIGN_RIGHT;
+	
+	public static final String DECIMAL_POINT_NONE = "0";
+	public static final String DECIMAL_POINT_FOUR = "0.0000";
 	
 	/**
 	 * Gets the default style used for the cells that contains values
@@ -22,16 +29,27 @@ public class CellStyles {
 		style.setFillForegroundColor(IndexedColors.WHITE.getIndex());
 		style.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
-		style.setAlignment(CellStyle.ALIGN_CENTER);
+		style.setAlignment(ALIGN_CENTER);
 		style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
 		
 	    Font font = workbook.createFont();
-	    font.setFontHeightInPoints(SMALL_TEXT);
+	    font.setFontHeightInPoints(TEXT_SIZE_SMALL);
 	    font.setFontName("Verdana");
 		style.setFont(font);
 		
 		style.setDataFormat(workbook.createDataFormat().getFormat("0.00"));
 		
+		return style;
+	}
+	
+	public static CellStyle setDataFormat(Workbook workbook, CellStyle style, String format){
+		style.setDataFormat(workbook.createDataFormat().getFormat(format));
+		
+		return style;
+	}
+	
+	public static CellStyle setAligment(CellStyle style, short align){
+		style.setAlignment(align);
 		return style;
 	}
 	
