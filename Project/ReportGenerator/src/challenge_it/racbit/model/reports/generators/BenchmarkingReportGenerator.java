@@ -99,7 +99,7 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 					
 					Cell dayCell = row.createCell(config.getNumberOfDaysCell().getColumn());
 					dayCell.setCellValue(day.getNumberOfDays());
-					dayCell.setCellStyle(CellStyles.setThinBorders(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.TEXT_SIZE_SMALL, workbook)));
+					dayCell.setCellStyle(CellStyles.setDataFormat(workbook, CellStyles.setThinBorders(CellStyles.setBold(CellStyles.getDefaultCellStyle(workbook), CellStyles.TEXT_SIZE_SMALL, workbook)), CellStyles.DECIMAL_POINT_NONE));
 					
 					Cell groupCell = row.createCell(config.getGroupCell().getColumn());
 					groupCell.setCellValue(group.getGroupName());
@@ -133,8 +133,7 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 						config.getGroupCell().getColumn(), //first column (0-based)
 						config.getGroupCell().getColumn()  //last column  (0-based)
 					));
-				}
-				
+				}				
 			}
 			offset++;	
 			
@@ -143,12 +142,12 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 			CrossReference lastCellValueIdxLast = new CrossReference((config.getLocationCell().getRow()+1) + (offset-groupOffset-1) + groupOffset, (brokers.size()*2)+4); //TO CHANGE
 			
 			//merge location name cell
-			sheet.addMergedRegion(new CellRangeAddress(
-					locationCellNameIdxFirst.getRow(), //first row (0-based)
-					lastCellValueIdxLast.getRow(), //last row  (0-based)
-					locationCellNameIdxFirst.getColumn(), //first column (0-based)
-					config.getLocationCell().getColumn()  //last column  (0-based)
-				));
+//			sheet.addMergedRegion(new CellRangeAddress(
+//					locationCellNameIdxFirst.getRow(), //first row (0-based)
+//					lastCellValueIdxLast.getRow(), //last row  (0-based)
+//					locationCellNameIdxFirst.getColumn(), //first column (0-based)
+//					config.getLocationCell().getColumn()  //last column  (0-based)
+//				));
 
 			groupOffset = offset+1; //update group offset	
 			
@@ -158,12 +157,13 @@ public class BenchmarkingReportGenerator implements IReportGenerator {
 			
 			
 			//merge currency cell
-			sheet.addMergedRegion(new CellRangeAddress(
-					locationCellNameIdxFirst.getRow(), //first row (0-based)
-					lastCellValueIdxLast.getRow(), //last row  (0-based)
-					locationCellNameIdxFirst.getColumn(), //first column (0-based)
-					config.getLocationCell().getColumn()  //last column  (0-based)
-				));
+			// TODO : Faz merge da location e nao do currency
+//			sheet.addMergedRegion(new CellRangeAddress(
+//					locationCellNameIdxFirst.getRow(), //first row (0-based)
+//					lastCellValueIdxLast.getRow(), //last row  (0-based)
+//					locationCellNameIdxFirst.getColumn(), //first column (0-based)
+//					config.getLocationCell().getColumn()  //last column  (0-based)
+//				));
 			
 		}
 		return offset;
